@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Menu - منصة قوائم المطاعم الرقمية</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .bk-text {
+            color: #000 !important;
+        }
+    </style>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fef7ed',
+                            100: '#fdedd3',
+                            200: '#fbd9a5',
+                            300: '#f8c06d',
+                            400: '#f59e32',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'fade-in-delayed': 'fadeInDelayed 0.8s ease-out 0.2s both',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out',
+                        'slide-in-right': 'slideInRight 0.5s ease-out',
+                        'slide-in-left': 'slideInLeft 0.5s ease-out',
+                        'bounce-in': 'bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+                        'pulse-subtle': 'pulseSubtle 2s ease-in-out infinite',
+                        'glow-pulse': 'glowPulse 2s infinite',
+                        'shimmer': 'shimmer 2s infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'rotate-in': 'rotateIn 0.6s ease-out',
+                        'scale-up': 'scaleUp 0.4s ease-out',
+                        'shake': 'shake 0.5s ease-in-out',
+                        'gradient-shift': 'gradientShift 3s ease infinite',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body dir="rtl" class="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 transition-colors duration-300">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200 shadow-lg transition-all duration-300" id="header">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="index.html" class="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+                    <i data-lucide="chef-hat" class="w-8 h-8 text-orange-500"></i>
+                    E-Menu
+                </a>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center gap-6">
+                    <a href="index.html" class="text-slate-600 hover:text-orange-500 transition-colors">الرئيسية</a>
+                    <a href="search.html" class="text-slate-600 hover:text-orange-500 transition-colors">البحث</a>
+                    <a href="login.html" class="text-slate-600 hover:text-orange-500 transition-colors">تسجيل الدخول</a>
+                    <a href="register.html" class="text-slate-600 hover:text-orange-500 transition-colors">إنشاء حساب</a>
+                </nav>
+
+                <!-- Controls -->
+                <div class="flex items-center gap-3">
+                    <!-- Language Toggle -->
+                    <button onclick="toggleLanguage()" class="p-2 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all" title="English">
+                        <i data-lucide="globe" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all">
+                        <i data-lucide="moon" class="w-5 h-5" id="theme-icon"></i>
+                    </button>
+
+                    <!-- Mobile Menu -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden mt-4 pb-4 border-t border-slate-200 hidden">
+                <nav class="flex flex-col gap-3 pt-4">
+                    <a href="index.html" class="text-slate-600 hover:text-orange-500 transition-colors">الرئيسية</a>
+                    <a href="search.html" class="text-slate-600 hover:text-orange-500 transition-colors">البحث</a>
+                    <a href="login.html" class="text-slate-600 hover:text-orange-500 transition-colors">تسجيل الدخول</a>
+                    <a href="register.html" class="text-slate-600 hover:text-orange-500 transition-colors">إنشاء حساب</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <!-- Left Content -->
+                <div class="space-y-6 animate-fade-in">
+                    <h1 class="text-5xl md:text-6xl font-bold leading-tight bk-text">
+                        اكتشف <span class="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">أفضل</span> المطاعم
+                    </h1>
+                    <p class="text-xl text-slate-600">
+                        استعرض قوائم المطاعم بسهولة واطلب طعامك المفضل من أي مكان
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <a href="search.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:opacity-90 text-white px-8 py-6 text-lg rounded-lg font-semibold transition-all">
+                            ابدأ البحث
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </a>
+                        <button class="font-bold px-8 py-6 text-lg border border-slate-300 hover:bg-slate-100 rounded-lg transition-all bk-text">
+                            تسجيل مطعم
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Image -->
+                <div class="relative h-96 md:h-full min-h-96 animate-fade-in-delayed">
+                    <div class="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-3xl blur-3xl"></div>
+                    <img src="https://images.unsplash.com/photo-1504674900967-a8bd7f9d1b0e?w=600&h=600&fit=crop" 
+                         alt="Featured Restaurant" 
+                         class="relative w-full h-full object-cover rounded-3xl shadow-2xl hover:scale-105 transition-transform duration-500">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-slate-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">لماذا E-Menu؟</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-8 text-center bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 cursor-pointer transition-all duration-300 hover:border-orange-500 border border-slate-200">
+                    <div class="text-orange-500 mb-4 flex justify-center">
+                        <i data-lucide="search" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">بحث سهل</h3>
+                    <p class="text-slate-600">ابحث عن مطاعمك المفضلة بسهولة</p>
+                </div>
+
+                <div class="p-8 text-center bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 cursor-pointer transition-all duration-300 hover:border-orange-500 border border-slate-200">
+                    <div class="text-orange-500 mb-4 flex justify-center">
+                        <i data-lucide="map-pin" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">مواقع قريبة</h3>
+                    <p class="text-slate-600">اكتشف المطاعم بالقرب منك</p>
+                </div>
+
+                <div class="p-8 text-center bg-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-2 cursor-pointer transition-all duration-300 hover:border-orange-500 border border-slate-200">
+                    <div class="text-orange-500 mb-4 flex justify-center">
+                        <i data-lucide="star" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">تقييمات موثوقة</h3>
+                    <p class="text-slate-600">اقرأ تقييمات العملاء الحقيقية</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Restaurants -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between mb-12">
+                <h2 class="text-4xl font-bold">المطاعم المميزة</h2>
+                <a href="search.html" class="text-orange-500 hover:text-orange-600 font-semibold flex items-center gap-2 transition-colors">
+                    عرض الكل
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="featured-restaurants">
+                <!-- Featured restaurants will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 bg-gradient-to-r from-orange-50 to-red-50 border-t border-slate-200">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold mb-4 bk-text">هل أنت صاحب مطعم؟</h2>
+            <p class="text-xl mb-8 text-slate-600">
+                انضم إلى آلاف المطاعم التي تستخدم e-menu.sy
+            </p>
+            <button class="bg-gradient-to-r from-orange-500 to-red-500 hover:opacity-90 text-white px-8 py-6 text-lg rounded-lg font-semibold transition-all">
+                ابدأ الآن
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-slate-100 border-t border-slate-200">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Brand -->
+                <div style="text-align: right !important;">
+                    <div class="flex items-center gap-2 text-2xl font-bold mb-4 bk-text">
+                        <i data-lucide="chef-hat" class="w-6 h-6 text-orange-500"></i>
+                        <span class="text-right">e-menu.sy</span>
+                    </div>
+                    <p class="text-slate-600 text-right">منصة قوائم المطاعم الرقمية</p>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold mb-4 bk-text">الروابط</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="index.html" class="hover:text-orange-500 transition-colors">الرئيسية</a></li>
+                        <li><a href="search.html" class="hover:text-orange-500 transition-colors">البحث</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">عن الموقع</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="font-bold mb-4 bk-text">الدعم</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">تواصل معنا</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">الأسئلة الشائعة</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">الشروط</a></li>
+                    </ul>
+                </div>
+
+                <!-- Social -->
+                <div>
+                    <h4 class="font-bold mb-4 bk-text">تابعنا</h4>
+                    <div class="flex gap-4 bk-text">
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">f</a>
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">𝕏</a>
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">📷</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t pt-8 text-center border-slate-200 text-slate-600">
+                <p>© 2025 e-menu.sy. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/api.js"></script>
+</body>
+</html>

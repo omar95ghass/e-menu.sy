@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البحث - E-Menu</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fef7ed',
+                            100: '#fdedd3',
+                            200: '#fbd9a5',
+                            300: '#f8c06d',
+                            400: '#f59e32',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 transition-colors duration-300">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200 shadow-lg transition-all duration-300" id="header">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <a href="index.html" class="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+                    <i data-lucide="chef-hat" class="w-8 h-8 text-orange-500"></i>
+                    E-Menu
+                </a>
+
+                <!-- Controls -->
+                <div class="flex items-center gap-3">
+                    <!-- Language Toggle -->
+                    <button onclick="toggleLanguage()" class="p-2 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all" title="English">
+                        <i data-lucide="globe" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all">
+                        <i data-lucide="moon" class="w-5 h-5" id="theme-icon"></i>
+                    </button>
+
+                    <!-- Mobile Menu -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden mt-4 pb-4 border-t border-slate-200 hidden">
+                <nav class="flex flex-col gap-3 pt-4">
+                    <a href="index.html" class="text-slate-600 hover:text-orange-500 transition-colors">الرئيسية</a>
+                    <a href="search.html" class="text-slate-600 hover:text-orange-500 transition-colors">البحث</a>
+                    <a href="login.html" class="text-slate-600 hover:text-orange-500 transition-colors">تسجيل الدخول</a>
+                    <a href="register.html" class="text-slate-600 hover:text-orange-500 transition-colors">إنشاء حساب</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="py-8 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex gap-2 mb-4">
+                <div class="flex-1 relative">
+                    <i data-lucide="search" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                    <input type="text" 
+                           id="search-input"
+                           placeholder="ابحث عن مطعم أو نوع طعام..." 
+                           class="w-full pr-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                </div>
+                <button onclick="performSearch()" class="bg-gradient-to-r from-orange-500 to-red-500 hover:opacity-90 text-white px-6 py-3 rounded-lg font-semibold transition-all">
+                    بحث
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-3">
+                <select id="city-filter" class="px-4 py-2 rounded-lg border border-slate-300 bg-white focus:border-orange-500 focus:outline-none transition-all">
+                    <option value="">جميع المدن</option>
+                    <option value="دمشق">دمشق</option>
+                    <option value="حلب">حلب</option>
+                    <option value="حمص">حمص</option>
+                    <option value="اللاذقية">اللاذقية</option>
+                </select>
+
+                <select id="category-filter" class="px-4 py-2 rounded-lg border border-slate-300 bg-white focus:border-orange-500 focus:outline-none transition-all">
+                    <option value="">جميع الفئات</option>
+                    <option value="طعام شامي">طعام شامي</option>
+                    <option value="برجر">برجر</option>
+                    <option value="مأكولات بحرية">مأكولات بحرية</option>
+                    <option value="بيتزا">بيتزا</option>
+                    <option value="مشاوي">مشاوي</option>
+                </select>
+
+                <select id="rating-filter" class="px-4 py-2 rounded-lg border border-slate-300 bg-white focus:border-orange-500 focus:outline-none transition-all">
+                    <option value="">جميع التقييمات</option>
+                    <option value="5">5 نجوم</option>
+                    <option value="4">4 نجوم وأكثر</option>
+                    <option value="3">3 نجوم وأكثر</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold" id="results-title">
+                النتائج (<span id="results-count">0</span>)
+            </h2>
+            <p class="text-slate-500 mt-2" id="search-query-display" style="display: none;">
+                البحث عن: <span class="font-semibold text-slate-700" id="search-query-text"></span>
+            </p>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="text-center py-12 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+            <p class="mt-2 text-slate-600">جاري البحث...</p>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="results-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Results will be loaded here -->
+        </div>
+
+        <!-- No Results -->
+        <div id="no-results" class="text-center py-12 rounded-lg bg-slate-200 hidden">
+            <i data-lucide="search" class="w-12 h-12 mx-auto mb-4 text-slate-400"></i>
+            <p class="text-lg font-semibold mb-2">لم نجد نتائج</p>
+            <p class="text-slate-600">
+                حاول البحث بكلمات مختلفة أو غير المرشحات
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-slate-100 border-t border-slate-200">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Brand -->
+                <div>
+                    <div class="flex items-center gap-2 text-2xl font-bold mb-4">
+                        <i data-lucide="chef-hat" class="w-6 h-6 text-orange-500"></i>
+                        <span>E-Menu</span>
+                    </div>
+                    <p class="text-slate-600">منصة قوائم المطاعم الرقمية</p>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold mb-4">الروابط</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="index.html" class="hover:text-orange-500 transition-colors">الرئيسية</a></li>
+                        <li><a href="search.html" class="hover:text-orange-500 transition-colors">البحث</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">عن الموقع</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="font-bold mb-4">الدعم</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">تواصل معنا</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">الأسئلة الشائعة</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">الشروط</a></li>
+                    </ul>
+                </div>
+
+                <!-- Social -->
+                <div>
+                    <h4 class="font-bold mb-4">تابعنا</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">f</a>
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">𝕏</a>
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">📷</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t pt-8 text-center border-slate-200 text-slate-600">
+                <p>© 2025 E-Menu. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/search.js"></script>
+</body>
+</html>

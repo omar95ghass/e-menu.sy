@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب - E-Menu</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fef7ed',
+                            100: '#fdedd3',
+                            200: '#fbd9a5',
+                            300: '#f8c06d',
+                            400: '#f59e32',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 transition-colors duration-300 scroll-smooth">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-slate-200 transition-colors duration-300">
+        <div class="container mx-auto px-4 py-4">
+            <a href="index.html" class="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+                <i data-lucide="chef-hat" class="w-8 h-8 text-orange-500"></i>
+                E-Menu
+            </a>
+        </div>
+    </header>
+
+    <!-- Register Form -->
+    <div class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-xl transition-colors animate-scale-up">
+            <div class="p-8">
+                <!-- Title -->
+                <div class="text-center mb-8 animate-fade-in-up">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 mb-4">
+                        <i data-lucide="chef-hat" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold mb-2">إنشاء حساب جديد</h1>
+                    <p class="text-slate-600">
+                        انضم إلى منصة E-Menu وابدأ في عرض قائمة مطعمك
+                    </p>
+                </div>
+
+                <!-- Form -->
+                <form id="register-form" class="space-y-4">
+                    <!-- Error Message -->
+                    <div id="error-message" class="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm animate-shake hidden">
+                        <!-- Error message will be shown here -->
+                    </div>
+
+                    <!-- Restaurant Name Field -->
+                    <div class="space-y-2 animate-fade-in-up" style="animation-delay: 0.1s">
+                        <label class="text-sm font-semibold">اسم المطعم</label>
+                        <div class="relative">
+                            <i data-lucide="store" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input type="text" 
+                                   id="restaurant-name"
+                                   placeholder="اسم مطعمك" 
+                                   class="w-full pr-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Owner Name Field -->
+                    <div class="space-y-2 animate-fade-in-up" style="animation-delay: 0.2s">
+                        <label class="text-sm font-semibold">اسم المالك</label>
+                        <div class="relative">
+                            <i data-lucide="user" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input type="text" 
+                                   id="owner-name"
+                                   placeholder="اسمك الكامل" 
+                                   class="w-full pr-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="space-y-2 animate-fade-in-up" style="animation-delay: 0.3s">
+                        <label class="text-sm font-semibold">البريد الإلكتروني</label>
+                        <div class="relative">
+                            <i data-lucide="mail" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input type="email" 
+                                   id="email"
+                                   placeholder="example@restaurant.com" 
+                                   class="w-full pr-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Phone Field -->
+                    <div class="space-y-2 animate-fade-in-up" style="animation-delay: 0.4s">
+                        <label class="text-sm font-semibold">رقم الهاتف</label>
+                        <div class="relative">
+                            <i data-lucide="phone" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input type="tel" 
+                                   id="phone"
+                                   placeholder="+963 11 123 4567" 
+                                   class="w-full pr-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- City Field -->
+                    <div class="space-y-2 animate-fade-in-up" style="animation-delay: 0.5s">
+                        <label class="text-sm font-semibold">المدينة</label>
+                        <div class="relative">
+                            <i data-lucide="map-pin" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <select id="city" 
+                                    class="w-full pr-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                                <option value="">اختر المدينة</option>
+                                <option value="دمشق">دمشق</option>
+                                <option value="حلب">حلب</option>
+                                <option value="حمص">حمص</option>
+                                <option value="اللاذقية">اللاذقية</option>
+                                <option value="حماة">حماة</option>
+                                <option value="دير الزور">دير الزور</option>
+                                <option value="الرقة">الرقة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="space-y-2 animate-fade-in-up" style="animation-delay: 0.6s">
+                        <label class="text-sm font-semibold">كلمة المرور</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input type="password" 
+                                   id="password"
+                                   placeholder="••••••••" 
+                                   class="w-full pr-10 pl-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                            <button type="button" 
+                                    onclick="togglePassword()" 
+                                    class="absolute left-3 top-3 text-slate-400 hover:text-slate-600">
+                                <i data-lucide="eye" class="w-5 h-5" id="password-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password Field -->
+                    <div class="space-y-2 animate-fade-in-up" style="animation-delay: 0.7s">
+                        <label class="text-sm font-semibold">تأكيد كلمة المرور</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="absolute right-3 top-3 w-5 h-5 text-slate-400"></i>
+                            <input type="password" 
+                                   id="confirm-password"
+                                   placeholder="••••••••" 
+                                   class="w-full pr-10 h-12 px-4 py-3 rounded-lg border border-slate-300 bg-slate-100 focus:border-orange-500 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="flex items-start gap-2 text-sm animate-fade-in-up" style="animation-delay: 0.8s">
+                        <input type="checkbox" id="terms" class="w-4 h-4 rounded mt-1">
+                        <label for="terms" class="text-slate-600">
+                            أوافق على <a href="#" class="text-orange-500 hover:text-orange-600 transition-colors">الشروط والأحكام</a> و <a href="#" class="text-orange-500 hover:text-orange-600 transition-colors">سياسة الخصوصية</a>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            id="submit-btn"
+                            class="w-full h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:opacity-90 text-white font-semibold transition-all animate-fade-in-up mt-6"
+                            style="animation-delay: 0.9s">
+                        <span id="submit-text">إنشاء الحساب</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 inline ml-2"></i>
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center border-slate-300">
+                        <div class="w-full border-t border-slate-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm bg-white">
+                        <span class="px-2 text-slate-600">أو</span>
+                    </div>
+                </div>
+
+                <!-- Social Register -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <button class="h-10 border border-slate-300 hover:bg-slate-100 rounded-lg transition-all font-semibold">
+                        Google
+                    </button>
+                    <button class="h-10 border border-slate-300 hover:bg-slate-100 rounded-lg transition-all font-semibold">
+                        Facebook
+                    </button>
+                </div>
+
+                <!-- Login Link -->
+                <p class="text-center text-sm animate-fade-in-up text-slate-600" style="animation-delay: 1s">
+                    لديك حساب بالفعل؟{' '}
+                    <a href="login.html" class="text-orange-500 hover:text-orange-600 font-semibold transition-colors">
+                        تسجيل الدخول
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-slate-100 border-t border-slate-200">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Brand -->
+                <div>
+                    <div class="flex items-center gap-2 text-2xl font-bold mb-4">
+                        <i data-lucide="chef-hat" class="w-6 h-6 text-orange-500"></i>
+                        <span>E-Menu</span>
+                    </div>
+                    <p class="text-slate-600">منصة قوائم المطاعم الرقمية</p>
+                </div>
+
+                <!-- Links -->
+                <div>
+                    <h4 class="font-bold mb-4">الروابط</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="index.html" class="hover:text-orange-500 transition-colors">الرئيسية</a></li>
+                        <li><a href="search.html" class="hover:text-orange-500 transition-colors">البحث</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">عن الموقع</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h4 class="font-bold mb-4">الدعم</h4>
+                    <ul class="space-y-2 text-slate-600">
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">تواصل معنا</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">الأسئلة الشائعة</a></li>
+                        <li><a href="#" class="hover:text-orange-500 transition-colors">الشروط</a></li>
+                    </ul>
+                </div>
+
+                <!-- Social -->
+                <div>
+                    <h4 class="font-bold mb-4">تابعنا</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">f</a>
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">𝕏</a>
+                        <a href="#" class="w-10 h-10 rounded-lg bg-slate-200 hover:bg-orange-500 hover:text-white flex items-center justify-center transition-all">📷</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t pt-8 text-center border-slate-200 text-slate-600">
+                <p>© 2025 E-Menu. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/register.js"></script>
+</body>
+</html>

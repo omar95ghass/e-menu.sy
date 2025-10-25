@@ -1,0 +1,372 @@
+<?php
+/**
+ * Frontend Integration Example
+ * Shows how the existing frontend can integrate with the new backend
+ */
+
+// This file demonstrates how to modify the existing frontend to work with the new backend
+// The existing frontend JavaScript files can be updated to use the new API endpoints
+
+?>
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Menu Backend Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; border-color: #c3e6cb; }
+        .error { background: #f8d7da; border-color: #f5c6cb; }
+        .info { background: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>E-Menu Backend Integration Test</h1>
+        
+        <div class="test-section info">
+            <h3>Backend Status</h3>
+            <p>This page tests the integration between the existing frontend and the new backend system.</p>
+            <button onclick="testHealth()">Test Health Check</button>
+            <button onclick="testRestaurants()">Test Restaurants API</button>
+            <button onclick="testRegistration()">Test Registration</button>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="health-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Restaurant Registration Test</h3>
+            <form id="registration-form">
+                <div style="margin: 10px 0;">
+                    <label>Email:</label><br>
+                    <input type="email" id="reg-email" value="test@restaurant.com" style="width: 100%; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Password:</label><br>
+                    <input type="password" id="reg-password" value="testpassword123" style="width: 100%; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Owner Name:</label><br>
+                    <input type="text" id="reg-owner" value="Test Owner" style="width: 100%; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Restaurant Name:</label><br>
+                    <input type="text" id="reg-restaurant" value="Test Restaurant" style="width: 100%; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Phone:</label><br>
+                    <input type="text" id="reg-phone" value="+963 11 123 4567" style="width: 100%; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>City:</label><br>
+                    <input type="text" id="reg-city" value="Damascus" style="width: 100%; padding: 8px;">
+                </div>
+                <button type="button" onclick="testRegistrationForm()">Register Restaurant</button>
+            </form>
+            <div id="registration-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Login Test</h3>
+            <form id="login-form">
+                <div style="margin: 10px 0;">
+                    <label>Email:</label><br>
+                    <input type="email" id="login-email" value="test@restaurant.com" style="width: 100%; padding: 8px;">
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Password:</label><br>
+                    <input type="password" id="login-password" value="testpassword123" style="width: 100%; padding: 8px;">
+                </div>
+                <button type="button" onclick="testLoginForm()">Login</button>
+            </form>
+            <div id="login-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>API Integration Examples</h3>
+            <p>These examples show how the existing frontend JavaScript can be updated to work with the new backend:</p>
+            
+            <h4>Updated API Client Example:</h4>
+            <pre style="background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto;">
+// Updated api.js for backend integration
+class APIClient {
+    constructor() {
+        this.baseURL = '/api';
+        this.csrfToken = null;
+    }
+
+    async request(endpoint, options = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                ...(this.csrfToken && { 'X-CSRF-Token': this.csrfToken })
+            },
+            credentials: 'include'
+        };
+
+        const finalOptions = { ...defaultOptions, ...options };
+
+        try {
+            const response = await fetch(url, finalOptions);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('API request failed:', error);
+            throw error;
+        }
+    }
+
+    // Restaurant registration
+    async register(registrationData) {
+        return await this.request('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify(registrationData)
+        });
+    }
+
+    // User login
+    async login(loginData) {
+        return await this.request('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify(loginData)
+        });
+    }
+
+    // Get restaurants
+    async getRestaurants(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/restaurants?${queryString}` : '/restaurants';
+        return await this.request(endpoint);
+    }
+
+    // Get restaurant by slug
+    async getRestaurant(slug) {
+        return await this.request(`/restaurant/${slug}`);
+    }
+
+    // Get restaurant menu
+    async getRestaurantMenu(restaurantId) {
+        return await this.request(`/menu/${restaurantId}`);
+    }
+
+    // Add menu item
+    async addMenuItem(menuItemData) {
+        return await this.request('/menu/add-item', {
+            method: 'POST',
+            body: JSON.stringify(menuItemData)
+        });
+    }
+
+    // Add review
+    async addRestaurantReview(restaurantId, reviewData) {
+        return await this.request('/review/add', {
+            method: 'POST',
+            body: JSON.stringify({
+                restaurant_id: restaurantId,
+                ...reviewData
+            })
+        });
+    }
+}
+            </pre>
+
+            <h4>Updated Login Page Example:</h4>
+            <pre style="background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto;">
+// Updated login.js for backend integration
+async function handleLogin() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await apiClient.login({
+            email: email,
+            password: password
+        });
+
+        if (response.success) {
+            // Store user data
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            localStorage.setItem('restaurant', JSON.stringify(response.data.restaurant));
+            
+            // Redirect to dashboard
+            window.location.href = '/dashboard/restaurant';
+        } else {
+            showError(response.message);
+        }
+    } catch (error) {
+        showError(error.message);
+    }
+}
+            </pre>
+        </div>
+
+        <div class="test-section info">
+            <h3>Integration Notes</h3>
+            <ul>
+                <li>The backend provides all the API endpoints that the frontend expects</li>
+                <li>Session-based authentication is used instead of JWT tokens</li>
+                <li>CSRF protection is implemented for security</li>
+                <li>All responses follow a consistent JSON format</li>
+                <li>Error handling is improved with detailed error messages</li>
+                <li>File uploads are handled securely with validation</li>
+                <li>Subdomain generation is automatic for restaurants</li>
+                <li>Subscription-based permissions are enforced</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Simple API client for testing
+        class TestAPIClient {
+            constructor() {
+                this.baseURL = '/api';
+            }
+
+            async request(endpoint, options = {}) {
+                const url = `${this.baseURL}${endpoint}`;
+                const defaultOptions = {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                const finalOptions = { ...defaultOptions, ...options };
+
+                try {
+                    const response = await fetch(url, finalOptions);
+                    const data = await response.json();
+                    return { success: response.ok, data: data, status: response.status };
+                } catch (error) {
+                    return { success: false, error: error.message };
+                }
+            }
+        }
+
+        const apiClient = new TestAPIClient();
+
+        async function testHealth() {
+            const result = await apiClient.request('/health');
+            document.getElementById('health-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testRestaurants() {
+            const result = await apiClient.request('/restaurants');
+            document.getElementById('health-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testRegistration() {
+            const data = {
+                email: 'test@restaurant.com',
+                password: 'testpassword123',
+                owner_name: 'Test Owner',
+                restaurant_name: 'Test Restaurant',
+                phone: '+963 11 123 4567',
+                city: 'Damascus',
+                cuisine_type: 'Syrian'
+            };
+
+            const result = await apiClient.request('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            document.getElementById('registration-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testLogin() {
+            const data = {
+                email: 'test@restaurant.com',
+                password: 'testpassword123'
+            };
+
+            const result = await apiClient.request('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            document.getElementById('login-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testRegistrationForm() {
+            const data = {
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-password').value,
+                owner_name: document.getElementById('reg-owner').value,
+                restaurant_name: document.getElementById('reg-restaurant').value,
+                phone: document.getElementById('reg-phone').value,
+                city: document.getElementById('reg-city').value,
+                cuisine_type: 'Syrian'
+            };
+
+            const result = await apiClient.request('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            document.getElementById('registration-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        async function testLoginForm() {
+            const data = {
+                email: document.getElementById('login-email').value,
+                password: document.getElementById('login-password').value
+            };
+
+            const result = await apiClient.request('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            document.getElementById('login-result').textContent = JSON.stringify(result, null, 2);
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            testHealth();
+        });
+    </script>
+</body>
+</html>

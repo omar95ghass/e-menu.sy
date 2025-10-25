@@ -1,0 +1,44 @@
+{
+  "name": "e-menu-html-client",
+  "version": "1.0.0",
+  "description": "E-Menu HTML5 client with Crystal theme, Bootstrap, Tailwind CSS, and Ajax integration",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8080",
+    "serve": "php -S localhost:8080",
+    "build": "echo 'No build process needed for static HTML'",
+    "lint": "echo 'Add HTML/CSS/JS linting tools here'",
+    "test": "echo 'Add testing framework here'"
+  },
+  "keywords": [
+    "html5",
+    "javascript",
+    "bootstrap",
+    "tailwind",
+    "ajax",
+    "restaurant",
+    "menu",
+    "crystal-theme",
+    "responsive",
+    "rtl"
+  ],
+  "author": "E-Menu Development Team",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {},
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/e-menu-html-client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/e-menu-html-client/issues"
+  },
+  "homepage": "https://github.com/your-org/e-menu-html-client#readme"
+}
