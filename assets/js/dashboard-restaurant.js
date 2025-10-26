@@ -55,13 +55,18 @@ class RestaurantDashboard {
         }
 
         try {
+            console.log('RestaurantDashboard.loadData: fetching dashboard and analytics data');
             const [restaurantResponse, analyticsResponse] = await Promise.all([
                 this.client.getRestaurantDashboard(),
                 this.client.getRestaurantAnalytics().catch((error) => {
                     this.analyticsAvailable = false;
+                    console.log('RestaurantDashboard.loadData: analytics request failed', error);
                     return { error };
                 })
             ]);
+
+            console.log('RestaurantDashboard.loadData: restaurant response', restaurantResponse);
+            console.log('RestaurantDashboard.loadData: analytics response', analyticsResponse);
 
             const restaurantPayload = restaurantResponse.data || restaurantResponse;
             const restaurant = restaurantPayload.data || restaurantPayload;

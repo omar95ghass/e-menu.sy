@@ -66,7 +66,9 @@ class RestaurantProfile {
 
     async loadRestaurant() {
         try {
+            console.log('RestaurantProfile.loadRestaurant: fetching restaurant profile');
             const response = await this.client.getRestaurantDashboard();
+            console.log('RestaurantProfile.loadRestaurant: response', response);
             const payload = response.data || response;
             this.restaurant = payload.data || payload;
             this.populateForm(this.restaurant);
@@ -126,10 +128,12 @@ class RestaurantProfile {
         if (!this.form || !this.saveButton) return;
 
         const data = this.collectFormData();
+        console.log('RestaurantProfile.handleSubmit: submitting data', data);
         this.setLoading(true);
 
         try {
             const response = await this.client.updateRestaurantProfile(data);
+            console.log('RestaurantProfile.handleSubmit: response', response);
             const payload = response.data || response;
             if (payload.success === false) {
                 throw new Error(payload.message || 'تعذر تحديث البيانات');
@@ -161,7 +165,9 @@ class RestaurantProfile {
 
         try {
             if (type === 'logo') {
+                console.log('RestaurantProfile.handleFileUpload: uploading logo', file);
                 const response = await this.client.uploadRestaurantLogo(file);
+                console.log('RestaurantProfile.handleFileUpload: logo response', response);
                 const payload = response.data || response;
                 const data = payload.data || payload;
                 if (data.logo_url && this.logoPreview) {
@@ -169,7 +175,9 @@ class RestaurantProfile {
                 }
                 this.client.showNotification(payload.message || 'تم تحديث الشعار', 'success');
             } else if (type === 'cover') {
+                console.log('RestaurantProfile.handleFileUpload: uploading cover', file);
                 const response = await this.client.uploadRestaurantCover(file);
+                console.log('RestaurantProfile.handleFileUpload: cover response', response);
                 const payload = response.data || response;
                 const data = payload.data || payload;
                 if (data.cover_url && this.coverPreview) {
