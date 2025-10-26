@@ -4,6 +4,12 @@
  * All system constants and configuration settings
  */
 
+if (defined('CONFIG_LOADED')) {
+    return;
+}
+
+define('CONFIG_LOADED', true);
+
 // Database Configuration
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'e_menu');
@@ -182,7 +188,7 @@ define('TWITTER_API_KEY', 'your-twitter-api-key');
 
 // Currency Configuration
 define('DEFAULT_CURRENCY', 'SYP');
-define('CURRENCY_SYMBOL', 'ل.س');
+define('APP_CURRENCY_SYMBOL', 'ل.س');
 define('CURRENCY_POSITION', 'after'); // before or after
 
 // Business Hours Configuration
