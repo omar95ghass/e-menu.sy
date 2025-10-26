@@ -459,14 +459,20 @@ class Auth {
      * Log user activity
      */
     private function logActivity($userId, $restaurantId, $action, $description) {
-        $this->db->insert('activity_logs', [
-            'user_id' => $userId,
-            'restaurant_id' => $restaurantId,
-            'action' => $action,
-            'description' => $description,
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
-        ]);
+        try {
+            $this->db->insert('activity_logs', [
+                'user_id' => $userId,
+                'restaurant_id' => $restaurantId,
+                'action' => $action,
+                'description' => $description,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+            ]);
+        } catch (Exception $e) {
+            if (LOG_ENABLED) {
+                error_log('[Auth] Failed to record activity: ' . $e->getMessage());
+            }
+        }
     }
 
     /**

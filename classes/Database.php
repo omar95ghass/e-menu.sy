@@ -306,12 +306,34 @@ class Database {
      * Log database errors
      */
     private function logError($message) {
-        if (LOG_ENABLED) {
-            $logFile = LOG_PATH . 'database_' . date('Y-m-d') . '.log';
-            $timestamp = date('Y-m-d H:i:s');
-            $logMessage = "[{$timestamp}] {$message}" . PHP_EOL;
-            file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+        if (!LOG_ENABLED) {
+            return;
         }
+
+        $timestamp = date('Y-m-d H:i:s');
+        $logMessage = "[{$timestamp}] {$message}" . PHP_EOL;
+
+        $logDir = rtrim(LOG_PATH, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        try {
+            if (!is_dir($logDir)) {
+                if (!@mkdir($logDir, 0775, true) && !is_dir($logDir)) {
+                    throw new RuntimeException('Unable to create log directory');
+                }
+            }
+
+            if (is_writable($logDir)) {
+                $logFile = $logDir . 'database_' . date('Y-m-d') . '.log';
+                @file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
+                if (file_exists($logFile)) {
+                    return;
+                }
+            }
+        } catch (Throwable $e) {
+            // Fall back to PHP's default error log below
+        }
+
+        error_log('[Database] ' . $message);
     }
 
     /**
