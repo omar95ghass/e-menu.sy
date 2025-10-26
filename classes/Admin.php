@@ -310,6 +310,25 @@ class Admin {
     }
 
     /**
+     * Get available subscription plans
+     */
+    public function getSubscriptionPlans() {
+        try {
+            if (!$this->auth->isAdmin()) {
+                throw new Exception('ليس لديك صلاحية للوصول إلى خطط الاشتراك');
+            }
+
+            return $this->subscription->getAllPlans();
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
      * Get system statistics
      */
     public function getSystemStats() {

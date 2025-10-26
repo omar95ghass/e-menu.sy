@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>تحديث ملف المطعم - E-Menu</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#f97316',
+                            600: '#ea580c'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="icon" type="image/png" href="../../assets/images/favicon.png">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-primary" href="../../index.html">
+            <span class="me-2">🍽️</span>E-Menu
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#profileNavbar" aria-controls="profileNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="profileNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">لوحة التحكم</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">ملف المطعم</a>
+                </li>
+            </ul>
+            <button class="btn btn-outline-danger" data-action="logout">تسجيل الخروج</button>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+    <header class="mb-4">
+        <h1 class="h3 mb-1" id="profile-title">تحديث ملف المطعم</h1>
+        <p class="text-muted mb-0">قم بتحديث بيانات المطعم لتظهر بشكل صحيح للعملاء</p>
+    </header>
+
+    <div id="form-alert" class="alert d-none" role="alert"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0">
+                    <h2 class="h6 mb-0">البيانات الأساسية</h2>
+                </div>
+                <div class="card-body">
+                    <form id="profile-form" class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">اسم المطعم (عربي)</label>
+                            <input type="text" class="form-control" id="name" name="name_ar" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="name-en" class="form-label">اسم المطعم (إنجليزي)</label>
+                            <input type="text" class="form-control" id="name-en" name="name">
+                        </div>
+                        <div class="col-12">
+                            <label for="description" class="form-label">نبذة عن المطعم</label>
+                            <textarea class="form-control" id="description" name="description_ar" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">رقم الهاتف</label>
+                            <input type="tel" class="form-control" id="phone" name="phone">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="email" name="email">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">المدينة</label>
+                            <input type="text" class="form-control" id="city" name="city_ar">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="address" class="form-label">العنوان</label>
+                            <input type="text" class="form-control" id="address" name="address_ar">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="opening-time" class="form-label">وقت الفتح</label>
+                            <input type="time" class="form-control" id="opening-time" name="opening_time">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="closing-time" class="form-label">وقت الإغلاق</label>
+                            <input type="time" class="form-control" id="closing-time" name="closing_time">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">أيام العمل</label>
+                            <div class="d-flex flex-wrap gap-3" id="working-days-group">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="السبت" id="day-sat">
+                                    <label class="form-check-label" for="day-sat">السبت</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="الأحد" id="day-sun">
+                                    <label class="form-check-label" for="day-sun">الأحد</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="الاثنين" id="day-mon">
+                                    <label class="form-check-label" for="day-mon">الاثنين</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="الثلاثاء" id="day-tue">
+                                    <label class="form-check-label" for="day-tue">الثلاثاء</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="الأربعاء" id="day-wed">
+                                    <label class="form-check-label" for="day-wed">الأربعاء</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="الخميس" id="day-thu">
+                                    <label class="form-check-label" for="day-thu">الخميس</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="الجمعة" id="day-fri">
+                                    <label class="form-check-label" for="day-fri">الجمعة</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="cuisine" class="form-label">نوع المطبخ</label>
+                            <input type="text" class="form-control" id="cuisine" name="cuisine_type_ar">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="website" class="form-label">الموقع الإلكتروني</label>
+                            <input type="url" class="form-control" id="website" name="website">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">روابط التواصل الاجتماعي</label>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="url" class="form-control" id="social-facebook" name="social_facebook" placeholder="رابط فيسبوك">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="url" class="form-control" id="social-instagram" name="social_instagram" placeholder="رابط إنستغرام">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="url" class="form-control" id="social-twitter" name="social_twitter" placeholder="رابط تويتر">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="url" class="form-control" id="social-youtube" name="social_youtube" placeholder="رابط يوتيوب">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary" id="save-button">حفظ التغييرات</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0">
+                    <h2 class="h6 mb-0">شعار المطعم</h2>
+                </div>
+                <div class="card-body text-center">
+                    <img id="logo-preview" src="" alt="شعار المطعم" class="img-fluid rounded mb-3 border" style="max-height: 160px; object-fit: contain;">
+                    <input type="file" class="form-control" id="logo-input" accept="image/*">
+                    <small class="text-muted d-block mt-2">الحد الأقصى 2MB. الصيغ المدعومة: JPG, PNG, WebP</small>
+                </div>
+            </div>
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0">
+                    <h2 class="h6 mb-0">صورة الغلاف</h2>
+                </div>
+                <div class="card-body text-center">
+                    <img id="cover-preview" src="" alt="صورة الغلاف" class="img-fluid rounded mb-3 border" style="max-height: 180px; object-fit: cover;">
+                    <input type="file" class="form-control" id="cover-input" accept="image/*">
+                    <small class="text-muted d-block mt-2">الحد الأقصى 4MB. الصيغ المدعومة: JPG, PNG, WebP</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../../assets/js/app.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/dashboard-common.js"></script>
+<script src="../../assets/js/dashboard-profile.js"></script>
+</body>
+</html>

@@ -159,7 +159,10 @@ class APIClient {
                 const message = typeof data === 'object' && data !== null
                     ? data.message || data.error || `HTTP error! status: ${response.status}`
                     : `HTTP error! status: ${response.status}`;
-                throw new Error(message);
+                const error = new Error(message);
+                error.status = response.status;
+                error.body = data;
+                throw error;
             }
 
             if (requiresCsrf) {
@@ -220,18 +223,26 @@ class APIClient {
     }
 
     async logout() {
-        // Since we're using session-based auth, logout is handled server-side
-        // We can clear local storage and redirect
+        try {
+            await this.request('/auth/logout', {
+                method: 'POST'
+            });
+        } catch (error) {
+            console.warn('Failed to logout via API:', error);
+        }
+
         localStorage.removeItem('user');
+
         const appBasePath = typeof window.getAppBasePath === 'function'
             ? window.getAppBasePath()
             : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
         const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
-        window.location.href = normalizedBase ? `${normalizedBase}/index.html` : '/index.html';
+        const target = normalizedBase ? `${normalizedBase}/login.html` : '/login.html';
+        window.location.href = target;
     }
 
     // Restaurant Dashboard API methods
-    async getDashboardStats() {
+    async getRestaurantDashboard() {
         return await this.request('/restaurant/dashboard');
     }
 
@@ -255,12 +266,37 @@ class APIClient {
         });
     }
 
-    async uploadImage(file) {
+    async uploadRestaurantLogo(file) {
         await this.ensureReady();
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('logo', file);
 
-        const response = await fetch(`${this.baseURL}/restaurant/upload-image`, {
+        const response = await fetch(`${this.baseURL}/restaurant/upload-logo`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+            headers: {
+                'X-CSRF-Token': this.csrfToken
+            }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result?.message || 'فشل في رفع الصورة');
+        }
+
+        this.readyPromise = this.refreshCsrfToken().catch(() => null);
+
+        return result;
+    }
+
+    async uploadRestaurantCover(file) {
+        await this.ensureReady();
+        const formData = new FormData();
+        formData.append('cover', file);
+
+        const response = await fetch(`${this.baseURL}/restaurant/upload-cover`, {
             method: 'POST',
             body: formData,
             credentials: 'include',
@@ -281,35 +317,59 @@ class APIClient {
     }
 
     // Admin API methods
-    async getAdminRestaurants() {
-        return await this.request('/admin/restaurants');
+    async getAdminRestaurants(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/admin/restaurants?${queryString}` : '/admin/restaurants';
+        return await this.request(endpoint);
     }
 
     async activateRestaurant(id) {
-        return await this.request(`/admin/restaurants/${id}/activate`, {
+        return await this.request(`/admin/activate/${id}`, {
             method: 'PUT'
         });
     }
 
+    async deactivateRestaurant(id) {
+        return await this.request(`/admin/deactivate/${id}`, {
+            method: 'PUT'
+        });
+    }
+
+    async deleteRestaurant(id) {
+        return await this.request(`/admin/remove/${id}`, {
+            method: 'DELETE'
+        });
+    }
+
     async assignPlan(restaurantId, planId) {
-        return await this.request(`/admin/restaurants/${restaurantId}/assign-plan`, {
+        return await this.request(`/admin/assign-plan/${restaurantId}`, {
             method: 'PUT',
             body: JSON.stringify({ plan_id: planId })
         });
     }
 
     async createPlan(planData) {
-        return await this.request('/admin/plans', {
+        return await this.request('/admin/add-plan', {
             method: 'POST',
             body: JSON.stringify(planData)
         });
     }
 
     async updatePlan(id, planData) {
-        return await this.request(`/admin/plans/${id}`, {
+        return await this.request(`/admin/edit-plan/${id}`, {
             method: 'PUT',
             body: JSON.stringify(planData)
         });
+    }
+
+    async deletePlan(id) {
+        return await this.request(`/admin/delete-plan/${id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    async getSubscriptionPlans() {
+        return await this.request('/admin/plans');
     }
 
     // Health check
@@ -317,10 +377,35 @@ class APIClient {
         return await this.request('/health');
     }
 
+    // Auth utilities
+    async getCurrentUser() {
+        return await this.request('/auth/me');
+    }
+
+    // Analytics helpers
+    async getSystemAnalytics(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/analytics/system?${queryString}` : '/analytics/system';
+        return await this.request(endpoint);
+    }
+
+    async getRestaurantAnalytics(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/analytics/restaurant?${queryString}` : '/analytics/restaurant';
+        return await this.request(endpoint);
+    }
+
+    async updateRestaurantProfile(profileData) {
+        return await this.request('/restaurant/update', {
+            method: 'PUT',
+            body: JSON.stringify(profileData)
+        });
+    }
+
     // Utility methods
     async handleError(error, context = '') {
         console.error(`API Error ${context}:`, error);
-        
+
         // Show user-friendly error message
         this.showNotification(
             error.message || 'حدث خطأ غير متوقع',
@@ -372,11 +457,28 @@ class APIClient {
 // Initialize API client
 let apiClient;
 
+if (!window.apiClientReady) {
+    window.apiClientReady = new Promise((resolve) => {
+        if (window.apiClient) {
+            resolve(window.apiClient);
+            return;
+        }
+
+        document.addEventListener('apiClientReady', (event) => {
+            resolve(event.detail);
+        }, { once: true });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     apiClient = new APIClient();
-    
+
     // Make it globally available
     window.apiClient = apiClient;
+
+    document.dispatchEvent(new CustomEvent('apiClientReady', {
+        detail: apiClient
+    }));
 });
 
 // Export for module usage

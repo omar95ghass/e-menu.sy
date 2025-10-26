@@ -24,7 +24,20 @@ switch ($action) {
             sendError('Method not allowed', 405);
         }
         break;
-        
+
+    case 'me':
+        if ($requestMethod === 'GET') {
+            $result = $auth->getSessionDetails();
+            if ($result['success']) {
+                sendResponse($result);
+            } else {
+                sendError($result['message'] ?? 'يجب تسجيل الدخول أولاً', 401);
+            }
+        } else {
+            sendError('Method not allowed', 405);
+        }
+        break;
+
     case 'logout':
         if ($requestMethod === 'POST') {
             $result = $auth->logout();

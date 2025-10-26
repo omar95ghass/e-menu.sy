@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>لوحة تحكم المطعم - E-Menu</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#f97316',
+                            600: '#ea580c'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="icon" type="image/png" href="../../assets/images/favicon.png">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-primary" href="../../index.html">
+            <span class="me-2">🍽️</span>E-Menu
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#restaurantNavbar" aria-controls="restaurantNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="restaurantNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">لوحة التحكم</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="profile.html">ملف المطعم</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="fw-semibold" id="owner-name">...</div>
+                    <small class="text-muted" id="owner-email">...</small>
+                </div>
+                <button class="btn btn-outline-danger" data-action="logout">تسجيل الخروج</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid py-4">
+    <header class="mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <h1 class="h3 mb-1" id="restaurant-name">لوحة التحكم</h1>
+                <p class="text-muted mb-0" id="restaurant-subtitle">متابعة أداء المطعم</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="profile.html" class="btn btn-outline-primary" id="profile-link">تحديث ملف المطعم</a>
+                <button class="btn btn-primary" id="refresh-dashboard">تحديث البيانات</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="row g-3 mb-5" id="statistics-cards">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <span class="text-muted">زيارات المطعم</span>
+                    <h3 class="fw-bold mt-2" id="stat-visitors">-</h3>
+                    <small class="text-muted" id="growth-visitors">&nbsp;</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <span class="text-muted">مشاهدات الصفحة</span>
+                    <h3 class="fw-bold mt-2" id="stat-page-views">-</h3>
+                    <small class="text-muted" id="growth-page-views">&nbsp;</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <span class="text-muted">مشاهدات القائمة</span>
+                    <h3 class="fw-bold mt-2" id="stat-menu-views">-</h3>
+                    <small class="text-muted" id="growth-menu-views">&nbsp;</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <span class="text-muted">مشاهدات الأصناف</span>
+                    <h3 class="fw-bold mt-2" id="stat-item-views">-</h3>
+                    <small class="text-muted" id="growth-item-views">&nbsp;</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h2 class="h6 mb-0">معلومات المطعم</h2>
+                </div>
+                <div class="card-body" id="restaurant-info">
+                    <div class="placeholder-glow">
+                        <span class="placeholder col-6"></span>
+                        <span class="placeholder col-4"></span>
+                        <span class="placeholder col-8"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom-0">
+                    <h2 class="h6 mb-0">خطة الاشتراك</h2>
+                </div>
+                <div class="card-body" id="subscription-info">
+                    <div class="text-muted">جاري تحميل معلومات الخطة...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="analytics-alert" class="alert alert-warning d-none" role="alert"></section>
+
+    <section class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+                    <h2 class="h6 mb-0">الأصناف الأكثر طلباً</h2>
+                    <small class="text-muted" id="popular-items-count"></small>
+                </div>
+                <div class="card-body">
+                    <div class="list-group" id="popular-items">
+                        <div class="list-group-item text-center text-muted">لا توجد بيانات بعد.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+                    <h2 class="h6 mb-0">أحدث التقييمات</h2>
+                    <small class="text-muted" id="reviews-count"></small>
+                </div>
+                <div class="card-body">
+                    <div class="list-group" id="recent-reviews">
+                        <div class="list-group-item text-center text-muted">لا توجد تقييمات بعد.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0 mt-4">
+        <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+            <h2 class="h6 mb-0">الأداء اليومي</h2>
+            <small class="text-muted" id="analytics-range">آخر 30 يوماً</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الزوار</th>
+                            <th>مشاهدات الصفحة</th>
+                            <th>مشاهدات القائمة</th>
+                            <th>طلبات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-stats-body">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">لا توجد بيانات متاحة.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="text-center py-4 text-muted">
+    <small id="last-updated">آخر تحديث: --</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../../assets/js/app.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/dashboard-common.js"></script>
+<script src="../../assets/js/dashboard-restaurant.js"></script>
+</body>
+</html>
