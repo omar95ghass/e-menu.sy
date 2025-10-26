@@ -70,14 +70,22 @@ class LoginPage {
                     password: this.password
                 });
 
-                if (response.ok) {
-                    // Store user data
-                    localStorage.setItem('user', JSON.stringify(response.user));
-                    
-                    // Redirect to dashboard
-                    window.location.href = '/dashboard/restaurant';
+                if (response && (response.success || response.ok)) {
+                    const userData = response.data?.user || response.user || null;
+
+                    if (userData) {
+                        localStorage.setItem('user', JSON.stringify(userData));
+                    }
+
+                    const appBasePath = typeof window.getAppBasePath === 'function'
+                        ? window.getAppBasePath()
+                        : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
+                    const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
+                    const dashboardUrl = normalizedBase ? `${normalizedBase}/dashboard/restaurant` : '/dashboard/restaurant';
+
+                    window.location.href = dashboardUrl;
                 } else {
-                    this.showError(response.message || 'فشل تسجيل الدخول');
+                    this.showError(response?.message || 'فشل تسجيل الدخول');
                 }
             } else {
                 // Mock login for demo
@@ -102,13 +110,19 @@ class LoginPage {
                     name: 'مطعم تجريبي',
                     role: 'restaurant'
                 };
-                
+
                 localStorage.setItem('user', JSON.stringify(mockUser));
                 this.showNotification('تم تسجيل الدخول بنجاح', 'success');
-                
+
+                const appBasePath = typeof window.getAppBasePath === 'function'
+                    ? window.getAppBasePath()
+                    : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
+                const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
+                const dashboardUrl = normalizedBase ? `${normalizedBase}/dashboard/restaurant` : '/dashboard/restaurant';
+
                 // Redirect after a short delay
                 setTimeout(() => {
-                    window.location.href = '/dashboard/restaurant';
+                    window.location.href = dashboardUrl;
                 }, 1000);
             } else {
                 this.showError('البريد الإلكتروني أو كلمة المرور غير صحيحة');

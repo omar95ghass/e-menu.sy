@@ -69,8 +69,16 @@ class SearchPage {
             
             if (window.apiClient) {
                 const response = await window.apiClient.getRestaurants();
-                if (response.ok && response.data) {
-                    this.restaurants = response.data;
+                if (response && (response.success || response.ok)) {
+                    const restaurants = Array.isArray(response.data)
+                        ? response.data
+                        : (Array.isArray(response.data?.data) ? response.data.data : []);
+
+                    if (restaurants.length) {
+                        this.restaurants = restaurants;
+                    } else {
+                        this.loadMockRestaurants();
+                    }
                 } else {
                     this.loadMockRestaurants();
                 }

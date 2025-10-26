@@ -8,9 +8,18 @@ define('API_BOOTSTRAPPED', true);
 // Set common headers once per request
 if (!headers_sent()) {
     header('Content-Type: application/json; charset=utf-8');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token');
+
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+    if ($origin) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Access-Control-Allow-Credentials: true');
+    } else {
+        header('Access-Control-Allow-Origin: *');
+    }
+
+    header('Vary: Origin');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token, X-Requested-With');
 }
 
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -73,15 +82,86 @@ $action = $segments[1] ?? '';
 $param = $segments[2] ?? null;
 $requestUri = implode('/', $segments);
 
-function sendResponse($data, $statusCode = 200) {
+function sendResponse($payload, $statusCode = 200) {
+    if (!is_array($payload)) {
+        $payload = [
+            'success' => true,
+            'ok' => true,
+            'data' => $payload,
+        ];
+    } else {
+        $hasSuccess = array_key_exists('success', $payload);
+        $hasOk = array_key_exists('ok', $payload);
+
+        if (!$hasSuccess && !$hasOk) {
+            $payload = [
+                'success' => true,
+                'ok' => true,
+                'data' => $payload,
+            ];
+        } else {
+            if ($hasSuccess) {
+                $payload['success'] = (bool) $payload['success'];
+            }
+            if ($hasOk) {
+                $payload['ok'] = (bool) $payload['ok'];
+            }
+            if ($hasSuccess && !$hasOk) {
+                $payload['ok'] = (bool) $payload['success'];
+            }
+            if ($hasOk && !$hasSuccess) {
+                $payload['success'] = (bool) $payload['ok'];
+            }
+        }
+    }
+
     http_response_code($statusCode);
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-function sendError($message, $statusCode = 400) {
-    sendResponse([
+function sendError($message, $statusCode = 400, array $context = []) {
+    http_response_code($statusCode);
+    echo json_encode(array_merge([
+        'success' => false,
         'ok' => false,
         'message' => $message,
-    ], $statusCode);
+    ], $context), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function getRequestHeaders(): array {
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        return array_change_key_case($headers, CASE_LOWER);
+    }
+
+    $headers = [];
+    foreach ($_SERVER as $key => $value) {
+        if (strpos($key, 'HTTP_') === 0) {
+            $normalized = strtolower(str_replace('_', '-', substr($key, 5)));
+            $headers[$normalized] = $value;
+        }
+    }
+
+    return $headers;
+}
+
+$requiresCsrfVerification = in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'], true);
+if ($requiresCsrfVerification) {
+    $headers = getRequestHeaders();
+    $csrfToken = $headers['x-csrf-token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
+
+    if (empty($csrfToken)) {
+        sendError('رمز الحماية غير موجود', 419);
+    }
+
+    try {
+        $csrfAuth = new Auth();
+        if (!$csrfAuth->verifyCSRFToken($csrfToken)) {
+            sendError('رمز الحماية غير صالح أو منتهي الصلاحية', 419);
+        }
+    } catch (Throwable $exception) {
+        sendError('تعذر التحقق من رمز الحماية', 500, ['details' => $exception->getMessage()]);
+    }
 }

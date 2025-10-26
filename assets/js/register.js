@@ -87,24 +87,32 @@ class RegisterPage {
 
         try {
             if (window.apiClient) {
-                const response = await window.apiClient.register({
-                    restaurantName: this.formData.restaurantName,
-                    ownerName: this.formData.ownerName,
+                const payload = {
+                    restaurant_name: this.formData.restaurantName,
+                    owner_name: this.formData.ownerName,
                     email: this.formData.email,
                     phone: this.formData.phone,
                     city: this.formData.city,
                     password: this.formData.password
-                });
+                };
 
-                if (response.ok) {
+                const response = await window.apiClient.register(payload);
+
+                if (response && (response.success || response.ok)) {
                     this.showNotification('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول', 'success');
-                    
+
+                    const appBasePath = typeof window.getAppBasePath === 'function'
+                        ? window.getAppBasePath()
+                        : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
+                    const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
+                    const loginUrl = normalizedBase ? `${normalizedBase}/login.html` : '/login.html';
+
                     // Redirect to login page after a short delay
                     setTimeout(() => {
-                        window.location.href = 'login.html';
+                        window.location.href = loginUrl;
                     }, 2000);
                 } else {
-                    this.showError(response.message || 'فشل في إنشاء الحساب');
+                    this.showError(response?.message || 'فشل في إنشاء الحساب');
                 }
             } else {
                 // Mock registration for demo
@@ -183,12 +191,18 @@ class RegisterPage {
         setTimeout(() => {
             // Simulate successful registration
             this.showNotification('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول', 'success');
-            
+
+            const appBasePath = typeof window.getAppBasePath === 'function'
+                ? window.getAppBasePath()
+                : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
+            const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
+            const loginUrl = normalizedBase ? `${normalizedBase}/login.html` : '/login.html';
+
             // Redirect to login page after a short delay
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = loginUrl;
             }, 2000);
-            
+
             this.loading = false;
             this.updateSubmitButton();
         }, 1500);

@@ -240,9 +240,13 @@ class EMenuApp {
         try {
             const response = await fetch(window.buildApiUrl('restaurants'));
             const data = await response.json();
-            
-            if (data.ok && data.data) {
-                this.renderFeaturedRestaurants(data.data.slice(0, 3));
+
+            const restaurants = Array.isArray(data.data)
+                ? data.data
+                : (Array.isArray(data.data?.data) ? data.data.data : []);
+
+            if ((data.success || data.ok) && restaurants.length) {
+                this.renderFeaturedRestaurants(restaurants.slice(0, 3));
             } else {
                 this.renderMockRestaurants();
             }

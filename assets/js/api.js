@@ -16,7 +16,8 @@ class APIClient {
                 if (!src) return null;
 
                 try {
-                    const url = new URL(src, window.location.origin);
+                    const baseReference = document.baseURI || window.location.href;
+                    const url = new URL(src, baseReference);
                     let path = url.pathname.replace(/\\/g, '/');
                     path = path.replace(/\/+/g, '/');
                     path = path.replace(/\/?assets\/js\/[^/]+$/, '');
@@ -36,7 +37,7 @@ class APIClient {
             if (derived === null) {
                 const scripts = document.getElementsByTagName('script');
                 for (const script of scripts) {
-                    const src = script.getAttribute('src');
+                    const src = script.src || script.getAttribute('src');
                     if (!src) continue;
                     if (src.includes('assets/js/api.js') || src.includes('assets/js/app.js')) {
                         derived = extractBasePath(src);
@@ -67,14 +68,11 @@ class APIClient {
 
         this.baseURL = resolvedBase || fallbackBase();
         this.csrfToken = null;
-        this.init();
+        this.readyPromise = this.refreshCsrfToken();
+        this.readyPromise.catch(() => {});
     }
 
-    async init() {
-        await this.getCSRFToken();
-    }
-
-    async getCSRFToken() {
+    async refreshCsrfToken() {
         try {
             const response = await fetch(`${this.baseURL}/auth/csrf-token`, {
                 method: 'GET',
@@ -86,16 +84,51 @@ class APIClient {
             }
 
             const data = await response.json();
-            if (data.ok && data.token) {
+            if ((data.success || data.ok) && data.token) {
                 this.csrfToken = data.token;
+                return this.csrfToken;
             }
+
+            throw new Error('CSRF token was not provided by the server');
         } catch (error) {
-            console.warn('Could not fetch CSRF token:', error);
+            this.csrfToken = null;
+            throw error;
         }
+    }
+
+    async ensureReady() {
+        if (!this.readyPromise) {
+            this.readyPromise = this.refreshCsrfToken();
+        }
+
+        try {
+            await this.readyPromise;
+        } catch (error) {
+            this.readyPromise = null;
+            throw error;
+        }
+
+        return this.csrfToken;
+    }
+
+    async getCSRFToken() {
+        await this.ensureReady();
+        return this.csrfToken;
     }
 
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
+        const method = (options.method || 'GET').toUpperCase();
+        const requiresCsrf = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+
+        if (requiresCsrf) {
+            try {
+                await this.ensureReady();
+            } catch (error) {
+                throw new Error(`Unable to fetch CSRF token: ${error.message}`);
+            }
+        }
+
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
@@ -113,17 +146,38 @@ class APIClient {
             }
         };
 
+        if (finalOptions.body instanceof FormData) {
+            delete finalOptions.headers['Content-Type'];
+        }
+
         try {
             const response = await fetch(url, finalOptions);
-            const data = await response.json();
-            
+            const contentType = response.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await response.json() : await response.text();
+
             if (!response.ok) {
-                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                const message = typeof data === 'object' && data !== null
+                    ? data.message || data.error || `HTTP error! status: ${response.status}`
+                    : `HTTP error! status: ${response.status}`;
+                throw new Error(message);
             }
-            
+
+            if (requiresCsrf) {
+                this.readyPromise = this.refreshCsrfToken().catch((error) => {
+                    console.warn('Failed to refresh CSRF token after request:', error);
+                    return null;
+                });
+            }
+
             return data;
         } catch (error) {
             console.error('API request failed:', error);
+            if (requiresCsrf) {
+                this.readyPromise = this.refreshCsrfToken().catch((refreshError) => {
+                    console.warn('Failed to refresh CSRF token after error:', refreshError);
+                    return null;
+                });
+            }
             throw error;
         }
     }
@@ -202,17 +256,28 @@ class APIClient {
     }
 
     async uploadImage(file) {
+        await this.ensureReady();
         const formData = new FormData();
         formData.append('image', file);
 
-        return await fetch(`${this.baseURL}/restaurant/upload-image`, {
+        const response = await fetch(`${this.baseURL}/restaurant/upload-image`, {
             method: 'POST',
             body: formData,
             credentials: 'include',
             headers: {
                 'X-CSRF-Token': this.csrfToken
             }
-        }).then(response => response.json());
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result?.message || 'فشل في رفع الصورة');
+        }
+
+        this.readyPromise = this.refreshCsrfToken().catch(() => null);
+
+        return result;
     }
 
     // Admin API methods
