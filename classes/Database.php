@@ -366,7 +366,7 @@ class Database {
     /**
      * Convert text to URL-friendly slug
      */
-    private function slugify($text) {
+    public function slugify($text) {
         // Convert to lowercase
         $text = strtolower($text);
         
