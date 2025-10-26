@@ -66,7 +66,9 @@ class DashboardAuth {
         const client = await this.waitForApiClient();
 
         try {
+            console.log('DashboardAuth.fetchSession: requesting current user');
             const response = await client.getCurrentUser();
+            console.log('DashboardAuth.fetchSession: response', response);
             const payload = response.data || response;
             const user = payload.user || payload.data?.user || null;
 
@@ -83,6 +85,7 @@ class DashboardAuth {
 
             return this.session;
         } catch (error) {
+            console.log('DashboardAuth.fetchSession: error', error);
             if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
                 this.session = null;
             }
