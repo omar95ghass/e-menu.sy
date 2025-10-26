@@ -1,4 +1,8 @@
 <?php
+if (!defined('API_BOOTSTRAPPED')) {
+    require_once __DIR__ . '/bootstrap.php';
+}
+
 // Auth endpoints
 $auth = new Auth();
 

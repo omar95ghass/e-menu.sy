@@ -1,4 +1,8 @@
 <?php
+if (!defined('API_BOOTSTRAPPED')) {
+    require_once __DIR__ . '/bootstrap.php';
+}
+
 // Analytics endpoints
 $statistics = new Statistics();
 $auth = new Auth();
