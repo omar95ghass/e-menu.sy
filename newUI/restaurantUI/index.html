@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة تحكم المطعم</title>
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Tailwind (CDN mode) -->
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide icons -->
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <!-- Theme overrides -->
+  <link rel="stylesheet" href="theme.css" />
+  <script>
+    // Tailwind config (optional: keep it minimal to preserve original look)
+    window.tailwind = {
+      config: {
+        theme: {
+          extend: {
+            animation: {
+              'fade-in-up': 'fade-in-up .4s ease both'
+            },
+            keyframes: {
+              'fade-in-up': {
+                '0%': { opacity: 0, transform: 'translateY(8px)' },
+                '100%': { opacity: 1, transform: 'translateY(0)' }
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900" data-theme="light">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 backdrop-blur-md border-b bg-white/80 border-slate-200">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+          <i data-lucide="chef-hat" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg">لوحة تحكم المطعم</h1>
+          <p class="text-sm text-slate-600" id="restaurantName">مطعم الذوق الشامي</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="/" class="p-2 rounded-lg hover:bg-slate-200">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sidebar & Content -->
+  <main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Sidebar -->
+      <aside class="lg:col-span-1">
+        <div class="rounded-lg p-4 space-y-2 sticky top-24 bg-white border border-slate-200">
+          <button data-tab="profile" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-right hover:bg-slate-100 active">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+            <span class="font-semibold">إعدادات الملف</span>
+          </button>
+          <button data-tab="menu" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-right hover:bg-slate-100">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+            <span class="font-semibold">إدارة المنيو</span>
+          </button>
+          <button data-tab="images" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-right hover:bg-slate-100">
+            <i data-lucide="image" class="w-5 h-5"></i>
+            <span class="font-semibold">الصور</span>
+          </button>
+          <button data-tab="statistics" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-right hover:bg-slate-100">
+            <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+            <span class="font-semibold">الإحصائيات</span>
+          </button>
+          <button data-tab="subscription" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-right hover:bg-slate-100">
+            <i data-lucide="credit-card" class="w-5 h-5"></i>
+            <span class="font-semibold">الاشتراك</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <section class="lg:col-span-3">
+        <!-- Profile -->
+        <div id="tab-profile" class="tab-pane animate-fade-in-up">
+          <div class="p-6 bg-white rounded-lg border">
+            <h2 class="text-2xl font-bold mb-6">إعدادات الملف الشخصي</h2>
+            <div class="space-y-6">
+              <!-- Logo -->
+              <div>
+                <label class="block text-sm font-semibold mb-2">شعار المطعم</label>
+                <label for="logo-input" class="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-orange-500 block">
+                  <i data-lucide="upload" class="w-8 h-8 mx-auto mb-2 text-slate-400"></i>
+                  <p class="text-sm">اسحب الصورة هنا أو انقر للاختيار</p>
+                </label>
+                <input id="logo-input" type="file" accept="image/*" class="hidden" />
+              </div>
+
+              <!-- Restaurant Info -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2">اسم المطعم</label>
+                  <input id="rest-name" type="text" value="مطعم الذوق الشامي" class="w-full px-4 py-2 rounded-lg border bg-slate-100 border-slate-300 focus:border-orange-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">المدينة</label>
+                  <input id="rest-city" type="text" value="دمشق" class="w-full px-4 py-2 rounded-lg border bg-slate-100 border-slate-300 focus:border-orange-500" />
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-semibold mb-2">الوصف</label>
+                <textarea id="rest-desc" class="w-full px-4 py-2 rounded-lg border bg-slate-100 border-slate-300 focus:border-orange-500 h-24">مطعم متخصص في الطعام الشامي الأصيل</textarea>
+              </div>
+
+              <!-- Contact Info -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold mb-2">رقم الهاتف</label>
+                  <input id="rest-phone" type="tel" value="+963 11 123 4567" class="w-full px-4 py-2 rounded-lg border bg-slate-100 border-slate-300 focus:border-orange-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold mb-2">البريد الإلكتروني</label>
+                  <input id="rest-email" type="email" value="info@restaurant.com" class="w-full px-4 py-2 rounded-lg border bg-slate-100 border-slate-300 focus:border-orange-500" />
+                </div>
+              </div>
+
+              <button id="save-profile" class="btn btn-gradient w-full md:w-auto">حفظ التغييرات</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu Manager -->
+        <div id="tab-menu" class="tab-pane hidden animate-fade-in-up">
+          <div class="p-6 bg-white rounded-lg border">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold">إدارة المنيو</h2>
+              <button id="add-category" class="btn btn-gradient flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                إضافة فئة
+              </button>
+            </div>
+            <div id="categories" class="space-y-4">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Images Manager -->
+        <div id="tab-images" class="tab-pane hidden animate-fade-in-up">
+          <div class="p-6 bg-white rounded-lg border">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold">إدارة الصور</h2>
+            </div>
+            <div class="border-2 border-dashed rounded-lg p-12 text-center hover:border-orange-500">
+              <input id="upload-input" type="file" accept="image/*" class="hidden">
+              <label for="upload-input" class="cursor-pointer block">
+                <i data-lucide="upload" class="w-12 h-12 mx-auto mb-4 text-slate-400"></i>
+                <p class="text-lg font-semibold mb-2">اسحب الصور هنا أو انقر للاختيار</p>
+                <p class="text-sm text-slate-600">PNG, JPG, WEBP</p>
+              </label>
+              <div class="mt-6" id="preview-wrap" hidden>
+                <img id="preview" src="" alt="preview" class="w-40 h-40 object-cover rounded-lg mx-auto" />
+              </div>
+              <button id="upload-btn" class="btn btn-gradient mt-6" disabled>رفع الصورة</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics -->
+        <div id="tab-statistics" class="tab-pane hidden animate-fade-in-up">
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="p-6 bg-white rounded-lg border">
+                <p class="text-sm text-slate-600">عدد الأصناف</p>
+                <p id="stat-items" class="text-3xl font-bold text-orange-500 mt-2">0</p>
+              </div>
+              <div class="p-6 bg-white rounded-lg border">
+                <p class="text-sm text-slate-600">عدد التقييمات</p>
+                <p id="stat-reviews" class="text-3xl font-bold text-orange-500 mt-2">0</p>
+              </div>
+              <div class="p-6 bg-white rounded-lg border">
+                <p class="text-sm text-slate-600">عدد الزيارات</p>
+                <p id="stat-visits" class="text-3xl font-bold text-orange-500 mt-2">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subscription -->
+        <div id="tab-subscription" class="tab-pane hidden animate-fade-in-up">
+          <div class="p-6 bg-white rounded-lg border">
+            <h2 class="text-2xl font-bold mb-6">خطة الاشتراك</h2>
+            <div class="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg p-6 text-white mb-6">
+              <h3 class="text-2xl font-bold mb-2" id="plan-name">الخطة المتقدمة</h3>
+              <p class="mb-4" id="plan-expiry">تاريخ الانتهاء: 2025-12-31</p>
+              <div class="space-y-2 text-sm" id="plan-features">
+                <p>✓ حد أقصى 50 صنف</p>
+                <p>✓ 100 صورة</p>
+                <p>✓ إحصائيات متقدمة</p>
+                <p>✓ دعم العملاء 24/7</p>
+              </div>
+            </div>
+            <button class="btn btn-gradient w-full">ترقية الخطة</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- App JS -->
+  <script src="dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

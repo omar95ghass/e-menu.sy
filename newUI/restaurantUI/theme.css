@@ -1,0 +1,22 @@
+/* Keep overrides minimal; visual parity with the React version */
+.btn-gradient {
+@apply bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg px-4 py-2 hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed;
+}
+
+
+/* Active tab styling */
+.tab-btn.active {
+background-image: linear-gradient(to right, rgb(249 115 22), rgb(239 68 68));
+color: #fff;
+}
+
+
+/* Utility when Tailwind CDN is present but we want tiny custom keyframes globally */
+@keyframes fade-in-up {
+0% { opacity: 0; transform: translateY(8px); }
+100% { opacity: 1; transform: translateY(0); }
+}
+
+
+/* RTL niceties for Bootstrap components coexistence */
+.form-control { direction: rtl; }
