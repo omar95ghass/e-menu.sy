@@ -126,15 +126,7 @@ class Auth {
     public function login($email, $password) {
         try {
             // Find user
-            $user = $this->db->fetch(
-                "SELECT u.*, r.id as restaurant_id, r.name as restaurant_name, r.slug, r.subdomain, 
-                        sp.*, r.subscription_status, r.subscription_end
-                 FROM users u 
-                 LEFT JOIN restaurants r ON u.id = r.user_id 
-                 LEFT JOIN subscription_plans sp ON r.subscription_plan_id = sp.id
-                 WHERE u.email = :email AND u.is_active = 1",
-                ['email' => $email]
-            );
+            $user = $this->fetchUserWithDetails('email', $email);
 
             if (!$user) {
                 throw new Exception('البريد الإلكتروني أو كلمة المرور غير صحيحة');
@@ -231,6 +223,36 @@ class Auth {
             'restaurant_id' => $_SESSION['restaurant_id'] ?? null,
             'restaurant_name' => $_SESSION['restaurant_name'] ?? null,
             'subscription_plan' => $_SESSION['subscription_plan'] ?? null
+        ];
+    }
+
+    /**
+     * Get current authenticated user details with restaurant and subscription information
+     */
+    public function getSessionDetails() {
+        if (!$this->isLoggedIn()) {
+            return [
+                'success' => false,
+                'message' => 'يجب تسجيل الدخول أولاً'
+            ];
+        }
+
+        $user = $this->fetchUserWithDetails('id', $_SESSION['user_id']);
+
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => 'المستخدم غير موجود'
+            ];
+        }
+
+        return [
+            'success' => true,
+            'data' => [
+                'user' => $this->getUserData($user),
+                'restaurant' => $user['restaurant_id'] ? $this->getRestaurantData($user) : null,
+                'subscription' => $user['restaurant_id'] ? $this->getSubscriptionData($user) : null
+            ]
         ];
     }
 
@@ -386,17 +408,18 @@ class Auth {
         $_SESSION['email'] = $user['email'];
         $_SESSION['name'] = $user['name'];
         $_SESSION['role'] = $user['role'];
-        
+
         if ($user['restaurant_id']) {
             $_SESSION['restaurant_id'] = $user['restaurant_id'];
             $_SESSION['restaurant_name'] = $user['restaurant_name'];
             $_SESSION['restaurant_slug'] = $user['slug'];
             $_SESSION['restaurant_subdomain'] = $user['subdomain'];
-            
+
             // Store subscription plan data in session
             $_SESSION['subscription_plan'] = [
                 'id' => $user['subscription_plan_id'],
-                'name' => $user['name'],
+                'name' => $user['subscription_plan_name'],
+                'name_ar' => $user['subscription_plan_name_ar'],
                 'max_categories' => $user['max_categories'],
                 'max_items' => $user['max_items'],
                 'max_images' => $user['max_images'],
@@ -441,7 +464,8 @@ class Auth {
     private function getSubscriptionData($user) {
         return [
             'plan_id' => $user['subscription_plan_id'],
-            'plan_name' => $user['name'],
+            'plan_name' => $user['subscription_plan_name'],
+            'plan_name_ar' => $user['subscription_plan_name_ar'],
             'max_categories' => $user['max_categories'],
             'max_items' => $user['max_items'],
             'max_images' => $user['max_images'],
@@ -453,6 +477,34 @@ class Auth {
                 'custom_domain' => (bool)$user['custom_domain']
             ]
         ];
+    }
+
+    /**
+     * Fetch user with related restaurant and subscription details
+     */
+    private function fetchUserWithDetails($column, $value) {
+        $allowedColumns = ['email', 'id'];
+
+        if (!in_array($column, $allowedColumns, true)) {
+            throw new InvalidArgumentException('Invalid lookup column');
+        }
+
+        $conditions = ["u.{$column} = :value", 'u.is_active = 1'];
+        $params = ['value' => $value];
+
+        $sql = "SELECT u.*, r.id as restaurant_id, r.name as restaurant_name, r.slug, r.subdomain,
+                       r.subscription_status, r.subscription_end,
+                       sp.id as subscription_plan_id, sp.name as subscription_plan_name,
+                       sp.name_ar as subscription_plan_name_ar,
+                       sp.max_categories, sp.max_items, sp.max_images,
+                       sp.color_customization, sp.analytics, sp.reviews,
+                       sp.online_ordering, sp.custom_domain
+                FROM users u
+                LEFT JOIN restaurants r ON u.id = r.user_id
+                LEFT JOIN subscription_plans sp ON r.subscription_plan_id = sp.id
+                WHERE " . implode(' AND ', $conditions);
+
+        return $this->db->fetch($sql, $params);
     }
 
     /**

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>لوحة تحكم الإدارة - E-Menu</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#f97316',
+                            600: '#ea580c'
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="icon" type="image/png" href="../../assets/images/favicon.png">
+</head>
+<body class="bg-light text-dark">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-primary" href="../../index.html">
+            <span class="me-2">🍽️</span>E-Menu
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">لوحة التحكم</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end">
+                    <div class="fw-semibold" id="admin-name">...</div>
+                    <small class="text-muted">مسؤول النظام</small>
+                </div>
+                <button class="btn btn-outline-danger" data-action="logout">تسجيل الخروج</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid py-4">
+    <section class="mb-4">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <h1 class="h3 mb-1">لوحة تحكم الإدارة</h1>
+                <p class="text-muted mb-0" id="welcome-text">مرحبا بك في النظام.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" id="refresh-dashboard">تحديث الإحصائيات</button>
+                <button class="btn btn-primary" id="refresh-restaurants">تحديث قائمة المطاعم</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <div class="row g-3" id="system-overview">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <span class="text-muted">إجمالي المطاعم</span>
+                        <h3 class="fw-bold mt-2" id="stat-total-restaurants">-</h3>
+                        <small class="text-success" id="stat-approved-restaurants">&nbsp;</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <span class="text-muted">المطاعم النشطة</span>
+                        <h3 class="fw-bold mt-2" id="stat-active-restaurants">-</h3>
+                        <small class="text-muted">المطاعم المفعلة والمشتركة</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <span class="text-muted">إجمالي الزيارات (30 يوم)</span>
+                        <h3 class="fw-bold mt-2" id="stat-total-visitors">-</h3>
+                        <small class="text-muted">الزوار الفريدون</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <span class="text-muted">عرض القوائم</span>
+                        <h3 class="fw-bold mt-2" id="stat-total-menu-views">-</h3>
+                        <small class="text-muted">عدد مرات فتح القوائم</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-md-center">
+                    <div>
+                        <h2 class="h5 mb-1">إدارة المطاعم</h2>
+                        <p class="text-muted mb-0">راجع الطلبات وقم بتفعيل الحسابات أو تعليقها</p>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="restaurant-filters" class="row g-3 align-items-end mb-4">
+                        <div class="col-12 col-md-3">
+                            <label for="filter-status" class="form-label">الحالة</label>
+                            <select class="form-select" id="filter-status" name="status">
+                                <option value="">كل الحالات</option>
+                                <option value="pending">بانتظار الموافقة</option>
+                                <option value="active">نشط</option>
+                                <option value="inactive">موقوف</option>
+                                <option value="expired">الاشتراك منتهٍ</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label for="filter-plan" class="form-label">الخطة</label>
+                            <select class="form-select" id="filter-plan" name="plan_id">
+                                <option value="">كل الخطط</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="filter-search" class="form-label">بحث</label>
+                            <input type="text" class="form-control" id="filter-search" name="search" placeholder="اسم المطعم أو البريد">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">تطبيق</button>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="restaurants-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>المطعم</th>
+                                    <th>المالك</th>
+                                    <th>الخطة</th>
+                                    <th>الحالة</th>
+                                    <th>الإحصائيات</th>
+                                    <th class="text-center">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="restaurants-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">جاري تحميل البيانات...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mt-3">
+                        <div class="text-muted" id="restaurants-summary"></div>
+                        <div class="btn-group" role="group" aria-label="التحكم بالصفحات">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="prev-page">السابق</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="next-page">التالي</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white border-bottom-0">
+                    <h2 class="h6 mb-0">توزيع خطط الاشتراك</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush" id="plan-distribution">
+                        <li class="list-group-item text-center text-muted">لا توجد بيانات بعد.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0">
+                    <h2 class="h6 mb-0">أفضل المطاعم أداءً</h2>
+                </div>
+                <div class="card-body">
+                    <div class="list-group" id="top-restaurants">
+                        <div class="list-group-item text-center text-muted">لا توجد بيانات بعد.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعيين خطة الاشتراك</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" id="planModalRestaurant">...</p>
+                <div class="mb-3">
+                    <label for="plan-select" class="form-label">الخطة</label>
+                    <select id="plan-select" class="form-select"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="assign-plan-submit">تعيين</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="../../assets/js/app.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/dashboard-common.js"></script>
+<script src="../../assets/js/dashboard-admin.js"></script>
+</body>
+</html>

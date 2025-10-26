@@ -232,7 +232,7 @@ async function handleLogin() {
             localStorage.setItem('restaurant', JSON.stringify(response.data.restaurant));
             
             // Redirect to dashboard
-            window.location.href = '/dashboard/restaurant';
+            window.location.href = '/dashboard/restaurant/index.html';
         } else {
             showError(response.message);
         }

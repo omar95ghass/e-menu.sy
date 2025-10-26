@@ -71,18 +71,19 @@ class LoginPage {
                 });
 
                 if (response && (response.success || response.ok)) {
-                    const userData = response.data?.user || response.user || null;
+                    const payload = response.data || response;
+                    const userData = payload.user || payload.data?.user || null;
+                    const restaurantData = payload.restaurant || payload.data?.restaurant || null;
 
                     if (userData) {
-                        localStorage.setItem('user', JSON.stringify(userData));
+                        const sessionSnapshot = {
+                            ...userData,
+                            restaurant: restaurantData || undefined
+                        };
+                        localStorage.setItem('user', JSON.stringify(sessionSnapshot));
                     }
 
-                    const appBasePath = typeof window.getAppBasePath === 'function'
-                        ? window.getAppBasePath()
-                        : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
-                    const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
-                    const dashboardUrl = normalizedBase ? `${normalizedBase}/dashboard/restaurant` : '/dashboard/restaurant';
-
+                    const dashboardUrl = this.getDashboardUrl(userData?.role);
                     window.location.href = dashboardUrl;
                 } else {
                     this.showError(response?.message || 'فشل تسجيل الدخول');
@@ -103,26 +104,21 @@ class LoginPage {
     mockLogin() {
         // Simulate API delay
         setTimeout(() => {
-            if (this.email === 'admin@restaurant.com' && this.password === 'password') {
+            if (this.email && this.password === 'password') {
+                const role = this.email.toLowerCase().includes('admin') ? 'admin' : 'restaurant';
                 const mockUser = {
                     id: 1,
                     email: this.email,
                     name: 'مطعم تجريبي',
-                    role: 'restaurant'
+                    role
                 };
 
                 localStorage.setItem('user', JSON.stringify(mockUser));
                 this.showNotification('تم تسجيل الدخول بنجاح', 'success');
 
-                const appBasePath = typeof window.getAppBasePath === 'function'
-                    ? window.getAppBasePath()
-                    : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
-                const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
-                const dashboardUrl = normalizedBase ? `${normalizedBase}/dashboard/restaurant` : '/dashboard/restaurant';
-
                 // Redirect after a short delay
                 setTimeout(() => {
-                    window.location.href = dashboardUrl;
+                    window.location.href = this.getDashboardUrl(mockUser.role);
                 }, 1000);
             } else {
                 this.showError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
@@ -130,6 +126,24 @@ class LoginPage {
             this.loading = false;
             this.updateSubmitButton();
         }, 1000);
+    }
+
+    getDashboardUrl(role) {
+        const appBasePath = typeof window.getAppBasePath === 'function'
+            ? window.getAppBasePath()
+            : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
+        const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
+
+        const routes = {
+            admin: '/dashboard/admin/index.html',
+            restaurant: '/dashboard/restaurant/index.html'
+        };
+
+        const fallback = '/index.html';
+        const path = routes[role] || fallback;
+        const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+        return normalizedBase ? `${normalizedBase}${normalizedPath}` : normalizedPath;
     }
 
     togglePassword() {
