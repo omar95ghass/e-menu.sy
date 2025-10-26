@@ -2,7 +2,20 @@
 
 class APIClient {
     constructor() {
-        this.baseURL = '/api';
+        const fallbackBase = () => {
+            if (typeof window.getApiBaseUrl === 'function') {
+                return window.getApiBaseUrl();
+            }
+            return (typeof window.API_BASE_URL === 'string' && window.API_BASE_URL.length > 0)
+                ? window.API_BASE_URL
+                : '/api';
+        };
+
+        const resolvedBase = typeof window.buildApiUrl === 'function'
+            ? window.buildApiUrl('')
+            : fallbackBase();
+
+        this.baseURL = resolvedBase || fallbackBase();
         this.csrfToken = null;
         this.init();
     }
@@ -101,7 +114,11 @@ class APIClient {
         // Since we're using session-based auth, logout is handled server-side
         // We can clear local storage and redirect
         localStorage.removeItem('user');
-        window.location.href = '/index.html';
+        const appBasePath = typeof window.getAppBasePath === 'function'
+            ? window.getAppBasePath()
+            : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
+        const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
+        window.location.href = normalizedBase ? `${normalizedBase}/index.html` : '/index.html';
     }
 
     // Restaurant Dashboard API methods

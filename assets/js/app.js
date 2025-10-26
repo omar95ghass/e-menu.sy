@@ -1,5 +1,106 @@
 // E-Menu Application - Main JavaScript File
 
+// Determine the correct base paths for the application and API endpoints
+// so the front-end works whether it's served from the web root or a
+// subdirectory (e.g. http://localhost/e-menu/ when using XAMPP).
+(function initializeBasePaths() {
+    if (window.getApiBaseUrl && window.getAppBasePath && window.buildApiUrl) {
+        // Base helpers already defined (avoid redefining when scripts are loaded multiple times)
+        return;
+    }
+
+    const isAbsoluteUrl = (value) => /^([a-z][a-z\d+\-.]*:)?\/\//i.test(value);
+
+    const normalizeRelativePath = (value, { allowRoot = false } = {}) => {
+        if (!value) return '';
+        let normalized = String(value).trim();
+        if (!normalized) return '';
+
+        normalized = normalized.replace(/\\/g, '/');
+        normalized = normalized.replace(/\/+/g, '/');
+        normalized = normalized.replace(/\/$/, '');
+
+        if (!normalized) return allowRoot ? '/' : '';
+
+        if (!normalized.startsWith('/')) {
+            normalized = `/${normalized}`;
+        }
+
+        if (!allowRoot && normalized === '/') {
+            return '';
+        }
+
+        return normalized;
+    };
+
+    window.getAppBasePath = function getAppBasePath() {
+        if (typeof window.APP_BASE_PATH === 'string') {
+            return window.APP_BASE_PATH;
+        }
+
+        const metaTag = document.querySelector('meta[name="app-base-path"]');
+        if (metaTag && metaTag.content) {
+            window.APP_BASE_PATH = normalizeRelativePath(metaTag.content, { allowRoot: false });
+            return window.APP_BASE_PATH;
+        }
+
+        const { pathname } = window.location;
+
+        if (!pathname || pathname === '/' || pathname === '') {
+            window.APP_BASE_PATH = '';
+            return window.APP_BASE_PATH;
+        }
+
+        const segments = pathname.split('/').filter(Boolean);
+        const isDirectory = pathname.endsWith('/');
+
+        if (!isDirectory) {
+            segments.pop();
+        }
+
+        window.APP_BASE_PATH = segments.length ? `/${segments.join('/')}` : '';
+        return window.APP_BASE_PATH;
+    };
+
+    window.getApiBaseUrl = function getApiBaseUrl() {
+        if (typeof window.API_BASE_URL === 'string' && window.API_BASE_URL.length > 0) {
+            return window.API_BASE_URL;
+        }
+
+        const metaTag = document.querySelector('meta[name="api-base-url"]');
+        if (metaTag && metaTag.content) {
+            const content = metaTag.content.trim();
+            if (content) {
+                window.API_BASE_URL = isAbsoluteUrl(content)
+                    ? content.replace(/\/$/, '')
+                    : normalizeRelativePath(content, { allowRoot: true }).replace(/\/$/, '');
+                return window.API_BASE_URL || '/api';
+            }
+        }
+
+        const appBasePath = window.getAppBasePath();
+        const baseUrl = `${appBasePath}/api`.replace(/\/+/g, '/').replace(/\/$/, '');
+        window.API_BASE_URL = baseUrl || '/api';
+        return window.API_BASE_URL;
+    };
+
+    window.buildApiUrl = function buildApiUrl(path = '') {
+        const baseUrl = window.getApiBaseUrl();
+        const normalizedBase = baseUrl.replace(/\/$/, '');
+        const normalizedPath = typeof path === 'string' ? path.replace(/^\/+/, '') : '';
+
+        if (!normalizedPath) {
+            return normalizedBase;
+        }
+
+        return `${normalizedBase}/${normalizedPath}`;
+    };
+
+    // Initialise and memoize the resolved paths
+    window.APP_BASE_PATH = window.getAppBasePath();
+    window.API_BASE_URL = window.getApiBaseUrl();
+})();
+
 class EMenuApp {
     constructor() {
         this.currentTheme = localStorage.getItem('theme') || 'light';
@@ -83,7 +184,7 @@ class EMenuApp {
 
     async loadFeaturedRestaurants() {
         try {
-            const response = await fetch('api/restaurants');
+            const response = await fetch(window.buildApiUrl('restaurants'));
             const data = await response.json();
             
             if (data.ok && data.data) {
