@@ -2,32 +2,133 @@
 
 class APIClient {
     constructor() {
-        this.baseURL = '/api';
+        const fallbackBase = () => {
+            if (typeof window.getApiBaseUrl === 'function') {
+                return window.getApiBaseUrl();
+            }
+            return (typeof window.API_BASE_URL === 'string' && window.API_BASE_URL.length > 0)
+                ? window.API_BASE_URL
+                : '/api';
+        };
+
+        const deriveBaseFromScript = () => {
+            const extractBasePath = (src) => {
+                if (!src) return null;
+
+                try {
+                    const baseReference = document.baseURI || window.location.href;
+                    const url = new URL(src, baseReference);
+                    let path = url.pathname.replace(/\\/g, '/');
+                    path = path.replace(/\/+/g, '/');
+                    path = path.replace(/\/?assets\/js\/[^/]+$/, '');
+                    path = path.replace(/\/$/, '');
+                    return path;
+                } catch (error) {
+                    return null;
+                }
+            };
+
+            if (Object.prototype.hasOwnProperty.call(window, '__APP_SCRIPT_BASE__')) {
+                return window.__APP_SCRIPT_BASE__;
+            }
+
+            let derived = extractBasePath(document.currentScript && document.currentScript.src);
+
+            if (derived === null) {
+                const scripts = document.getElementsByTagName('script');
+                for (const script of scripts) {
+                    const src = script.src || script.getAttribute('src');
+                    if (!src) continue;
+                    if (src.includes('assets/js/api.js') || src.includes('assets/js/app.js')) {
+                        derived = extractBasePath(src);
+                        if (derived !== null) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            window.__APP_SCRIPT_BASE__ = derived;
+            return derived;
+        };
+
+        const resolvedBase = (() => {
+            if (typeof window.buildApiUrl === 'function') {
+                return window.buildApiUrl('');
+            }
+
+            const derived = deriveBaseFromScript();
+            if (derived !== null && typeof derived === 'string') {
+                const normalized = derived.replace(/\/$/, '');
+                return normalized ? `${normalized}/api` : '/api';
+            }
+
+            return fallbackBase();
+        })();
+
+        this.baseURL = resolvedBase || fallbackBase();
         this.csrfToken = null;
-        this.init();
+        this.readyPromise = this.refreshCsrfToken();
+        this.readyPromise.catch(() => {});
     }
 
-    async init() {
-        await this.getCSRFToken();
-    }
-
-    async getCSRFToken() {
+    async refreshCsrfToken() {
         try {
             const response = await fetch(`${this.baseURL}/auth/csrf-token`, {
                 method: 'GET',
                 credentials: 'include'
             });
-            const data = await response.json();
-            if (data.ok && data.token) {
-                this.csrfToken = data.token;
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to fetch CSRF token (${response.status}): ${errorText}`);
             }
+
+            const data = await response.json();
+            if ((data.success || data.ok) && data.token) {
+                this.csrfToken = data.token;
+                return this.csrfToken;
+            }
+
+            throw new Error('CSRF token was not provided by the server');
         } catch (error) {
-            console.warn('Could not fetch CSRF token:', error);
+            this.csrfToken = null;
+            throw error;
         }
+    }
+
+    async ensureReady() {
+        if (!this.readyPromise) {
+            this.readyPromise = this.refreshCsrfToken();
+        }
+
+        try {
+            await this.readyPromise;
+        } catch (error) {
+            this.readyPromise = null;
+            throw error;
+        }
+
+        return this.csrfToken;
+    }
+
+    async getCSRFToken() {
+        await this.ensureReady();
+        return this.csrfToken;
     }
 
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
+        const method = (options.method || 'GET').toUpperCase();
+        const requiresCsrf = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+
+        if (requiresCsrf) {
+            try {
+                await this.ensureReady();
+            } catch (error) {
+                throw new Error(`Unable to fetch CSRF token: ${error.message}`);
+            }
+        }
+
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
@@ -45,17 +146,41 @@ class APIClient {
             }
         };
 
+        if (finalOptions.body instanceof FormData) {
+            delete finalOptions.headers['Content-Type'];
+        }
+
         try {
             const response = await fetch(url, finalOptions);
-            const data = await response.json();
-            
+            const contentType = response.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await response.json() : await response.text();
+
             if (!response.ok) {
-                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                const message = typeof data === 'object' && data !== null
+                    ? data.message || data.error || `HTTP error! status: ${response.status}`
+                    : `HTTP error! status: ${response.status}`;
+                const error = new Error(message);
+                error.status = response.status;
+                error.body = data;
+                throw error;
             }
-            
+
+            if (requiresCsrf) {
+                this.readyPromise = this.refreshCsrfToken().catch((error) => {
+                    console.warn('Failed to refresh CSRF token after request:', error);
+                    return null;
+                });
+            }
+
             return data;
         } catch (error) {
             console.error('API request failed:', error);
+            if (requiresCsrf) {
+                this.readyPromise = this.refreshCsrfToken().catch((refreshError) => {
+                    console.warn('Failed to refresh CSRF token after error:', refreshError);
+                    return null;
+                });
+            }
             throw error;
         }
     }
@@ -98,14 +223,26 @@ class APIClient {
     }
 
     async logout() {
-        // Since we're using session-based auth, logout is handled server-side
-        // We can clear local storage and redirect
+        try {
+            await this.request('/auth/logout', {
+                method: 'POST'
+            });
+        } catch (error) {
+            console.warn('Failed to logout via API:', error);
+        }
+
         localStorage.removeItem('user');
-        window.location.href = '/index.html';
+
+        const appBasePath = typeof window.getAppBasePath === 'function'
+            ? window.getAppBasePath()
+            : (typeof window.APP_BASE_PATH === 'string' ? window.APP_BASE_PATH : '');
+        const normalizedBase = appBasePath ? appBasePath.replace(/\/$/, '') : '';
+        const target = normalizedBase ? `${normalizedBase}/login.html` : '/login.html';
+        window.location.href = target;
     }
 
     // Restaurant Dashboard API methods
-    async getDashboardStats() {
+    async getRestaurantDashboard() {
         return await this.request('/restaurant/dashboard');
     }
 
@@ -129,50 +266,110 @@ class APIClient {
         });
     }
 
-    async uploadImage(file) {
+    async uploadRestaurantLogo(file) {
+        await this.ensureReady();
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('logo', file);
 
-        return await fetch(`${this.baseURL}/restaurant/upload-image`, {
+        const response = await fetch(`${this.baseURL}/restaurant/upload-logo`, {
             method: 'POST',
             body: formData,
             credentials: 'include',
             headers: {
                 'X-CSRF-Token': this.csrfToken
             }
-        }).then(response => response.json());
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result?.message || 'فشل في رفع الصورة');
+        }
+
+        this.readyPromise = this.refreshCsrfToken().catch(() => null);
+
+        return result;
+    }
+
+    async uploadRestaurantCover(file) {
+        await this.ensureReady();
+        const formData = new FormData();
+        formData.append('cover', file);
+
+        const response = await fetch(`${this.baseURL}/restaurant/upload-cover`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+            headers: {
+                'X-CSRF-Token': this.csrfToken
+            }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result?.message || 'فشل في رفع الصورة');
+        }
+
+        this.readyPromise = this.refreshCsrfToken().catch(() => null);
+
+        return result;
     }
 
     // Admin API methods
-    async getAdminRestaurants() {
-        return await this.request('/admin/restaurants');
+    async getAdminRestaurants(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/admin/restaurants?${queryString}` : '/admin/restaurants';
+        return await this.request(endpoint);
     }
 
     async activateRestaurant(id) {
-        return await this.request(`/admin/restaurants/${id}/activate`, {
+        return await this.request(`/admin/activate/${id}`, {
             method: 'PUT'
         });
     }
 
+    async deactivateRestaurant(id) {
+        return await this.request(`/admin/deactivate/${id}`, {
+            method: 'PUT'
+        });
+    }
+
+    async deleteRestaurant(id) {
+        return await this.request(`/admin/remove/${id}`, {
+            method: 'DELETE'
+        });
+    }
+
     async assignPlan(restaurantId, planId) {
-        return await this.request(`/admin/restaurants/${restaurantId}/assign-plan`, {
+        return await this.request(`/admin/assign-plan/${restaurantId}`, {
             method: 'PUT',
             body: JSON.stringify({ plan_id: planId })
         });
     }
 
     async createPlan(planData) {
-        return await this.request('/admin/plans', {
+        return await this.request('/admin/add-plan', {
             method: 'POST',
             body: JSON.stringify(planData)
         });
     }
 
     async updatePlan(id, planData) {
-        return await this.request(`/admin/plans/${id}`, {
+        return await this.request(`/admin/edit-plan/${id}`, {
             method: 'PUT',
             body: JSON.stringify(planData)
         });
+    }
+
+    async deletePlan(id) {
+        return await this.request(`/admin/delete-plan/${id}`, {
+            method: 'DELETE'
+        });
+    }
+
+    async getSubscriptionPlans() {
+        return await this.request('/admin/plans');
     }
 
     // Health check
@@ -180,10 +377,35 @@ class APIClient {
         return await this.request('/health');
     }
 
+    // Auth utilities
+    async getCurrentUser() {
+        return await this.request('/auth/me');
+    }
+
+    // Analytics helpers
+    async getSystemAnalytics(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/analytics/system?${queryString}` : '/analytics/system';
+        return await this.request(endpoint);
+    }
+
+    async getRestaurantAnalytics(params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        const endpoint = queryString ? `/analytics/restaurant?${queryString}` : '/analytics/restaurant';
+        return await this.request(endpoint);
+    }
+
+    async updateRestaurantProfile(profileData) {
+        return await this.request('/restaurant/update', {
+            method: 'PUT',
+            body: JSON.stringify(profileData)
+        });
+    }
+
     // Utility methods
     async handleError(error, context = '') {
         console.error(`API Error ${context}:`, error);
-        
+
         // Show user-friendly error message
         this.showNotification(
             error.message || 'حدث خطأ غير متوقع',
@@ -235,11 +457,28 @@ class APIClient {
 // Initialize API client
 let apiClient;
 
+if (!window.apiClientReady) {
+    window.apiClientReady = new Promise((resolve) => {
+        if (window.apiClient) {
+            resolve(window.apiClient);
+            return;
+        }
+
+        document.addEventListener('apiClientReady', (event) => {
+            resolve(event.detail);
+        }, { once: true });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     apiClient = new APIClient();
-    
+
     // Make it globally available
     window.apiClient = apiClient;
+
+    document.dispatchEvent(new CustomEvent('apiClientReady', {
+        detail: apiClient
+    }));
 });
 
 // Export for module usage

@@ -1,4 +1,8 @@
 <?php
+if (!defined('API_BOOTSTRAPPED')) {
+    require_once __DIR__ . '/bootstrap.php';
+}
+
 // Restaurant endpoints (authenticated)
 $restaurant = new Restaurant();
 $auth = new Auth();

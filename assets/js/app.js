@@ -1,5 +1,160 @@
 // E-Menu Application - Main JavaScript File
 
+// Determine the correct base paths for the application and API endpoints
+// so the front-end works whether it's served from the web root or a
+// subdirectory (e.g. http://localhost/e-menu/ when using XAMPP).
+(function initializeBasePaths() {
+    if (window.getApiBaseUrl && window.getAppBasePath && window.buildApiUrl) {
+        // Base helpers already defined (avoid redefining when scripts are loaded multiple times)
+        return;
+    }
+
+    const isAbsoluteUrl = (value) => /^([a-z][a-z\d+\-.]*:)?\/\//i.test(value);
+
+    const normalizeRelativePath = (value, { allowRoot = false } = {}) => {
+        if (!value) return '';
+        let normalized = String(value).trim();
+        if (!normalized) return '';
+
+        normalized = normalized.replace(/\\/g, '/');
+        normalized = normalized.replace(/\/+/g, '/');
+        normalized = normalized.replace(/\/$/, '');
+
+        if (!normalized) return allowRoot ? '/' : '';
+
+        if (!normalized.startsWith('/')) {
+            normalized = `/${normalized}`;
+        }
+
+        if (!allowRoot && normalized === '/') {
+            return '';
+        }
+
+        return normalized;
+    };
+
+    const deriveBaseFromScript = () => {
+        if (Object.prototype.hasOwnProperty.call(window, '__APP_SCRIPT_BASE__')) {
+            return window.__APP_SCRIPT_BASE__;
+        }
+
+        const extractBasePath = (src) => {
+            if (!src) return null;
+
+            try {
+                const url = new URL(src, window.location.origin);
+                let path = url.pathname.replace(/\\/g, '/');
+                path = path.replace(/\/+/g, '/');
+                path = path.replace(/\/?assets\/js\/[^/]+$/, '');
+                path = path.replace(/\/$/, '');
+                return path;
+            } catch (error) {
+                return null;
+            }
+        };
+
+        const { currentScript } = document;
+        let derived = extractBasePath(currentScript && currentScript.src);
+
+        if (derived === null) {
+            const scripts = document.getElementsByTagName('script');
+            for (const script of scripts) {
+                const src = script.getAttribute('src');
+                if (!src) continue;
+                if (src.includes('assets/js/app.js') || src.includes('assets/js/api.js')) {
+                    derived = extractBasePath(src);
+                    if (derived !== null) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        window.__APP_SCRIPT_BASE__ = derived;
+        return derived;
+    };
+
+    window.getAppBasePath = function getAppBasePath() {
+        if (typeof window.APP_BASE_PATH === 'string') {
+            return window.APP_BASE_PATH;
+        }
+
+        const metaTag = document.querySelector('meta[name="app-base-path"]');
+        if (metaTag && metaTag.content) {
+            window.APP_BASE_PATH = normalizeRelativePath(metaTag.content, { allowRoot: false });
+            return window.APP_BASE_PATH;
+        }
+
+        const derived = deriveBaseFromScript();
+        if (derived !== null && typeof derived === 'string') {
+            window.APP_BASE_PATH = derived;
+            return window.APP_BASE_PATH;
+        }
+
+        const { pathname } = window.location;
+
+        if (!pathname || pathname === '/' || pathname === '') {
+            window.APP_BASE_PATH = '';
+            return window.APP_BASE_PATH;
+        }
+
+        const segments = pathname.split('/').filter(Boolean);
+        const isDirectory = pathname.endsWith('/');
+
+        if (!isDirectory) {
+            segments.pop();
+        }
+
+        window.APP_BASE_PATH = segments.length ? `/${segments.join('/')}` : '';
+        return window.APP_BASE_PATH;
+    };
+
+    window.getApiBaseUrl = function getApiBaseUrl() {
+        if (typeof window.API_BASE_URL === 'string' && window.API_BASE_URL.length > 0) {
+            return window.API_BASE_URL;
+        }
+
+        const metaTag = document.querySelector('meta[name="api-base-url"]');
+        if (metaTag && metaTag.content) {
+            const content = metaTag.content.trim();
+            if (content) {
+                window.API_BASE_URL = isAbsoluteUrl(content)
+                    ? content.replace(/\/$/, '')
+                    : normalizeRelativePath(content, { allowRoot: true }).replace(/\/$/, '');
+                return window.API_BASE_URL || '/api';
+            }
+        }
+
+        const derived = deriveBaseFromScript();
+        if (derived !== null && typeof derived === 'string') {
+            const normalized = derived.replace(/\/$/, '');
+            window.API_BASE_URL = normalized ? `${normalized}/api` : '/api';
+            return window.API_BASE_URL;
+        }
+
+        const appBasePath = window.getAppBasePath();
+        const baseUrl = `${appBasePath}/api`.replace(/\/+/g, '/').replace(/\/$/, '');
+        window.API_BASE_URL = baseUrl || '/api';
+        return window.API_BASE_URL;
+    };
+
+    window.buildApiUrl = function buildApiUrl(path = '') {
+        const baseUrl = window.getApiBaseUrl();
+        const normalizedBase = baseUrl.replace(/\/$/, '');
+        const normalizedPath = typeof path === 'string' ? path.replace(/^\/+/, '') : '';
+
+        if (!normalizedPath) {
+            return normalizedBase;
+        }
+
+        return `${normalizedBase}/${normalizedPath}`;
+    };
+
+    // Initialise and memoize the resolved paths
+    window.APP_BASE_PATH = window.getAppBasePath();
+    window.API_BASE_URL = window.getApiBaseUrl();
+})();
+
 class EMenuApp {
     constructor() {
         this.currentTheme = localStorage.getItem('theme') || 'light';
@@ -83,11 +238,15 @@ class EMenuApp {
 
     async loadFeaturedRestaurants() {
         try {
-            const response = await fetch('api/restaurants');
+            const response = await fetch(window.buildApiUrl('restaurants'));
             const data = await response.json();
-            
-            if (data.ok && data.data) {
-                this.renderFeaturedRestaurants(data.data.slice(0, 3));
+
+            const restaurants = Array.isArray(data.data)
+                ? data.data
+                : (Array.isArray(data.data?.data) ? data.data.data : []);
+
+            if ((data.success || data.ok) && restaurants.length) {
+                this.renderFeaturedRestaurants(restaurants.slice(0, 3));
             } else {
                 this.renderMockRestaurants();
             }

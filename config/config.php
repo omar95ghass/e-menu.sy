@@ -4,6 +4,12 @@
  * All system constants and configuration settings
  */
 
+if (defined('CONFIG_LOADED')) {
+    return;
+}
+
+define('CONFIG_LOADED', true);
+
 // Database Configuration
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'e_menu');
@@ -125,10 +131,16 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'production') {
 }
 
 // Session Configuration
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', 0); // Set to 1 for HTTPS
-ini_set('session.use_strict_mode', 1);
-ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+// Some hosting environments (or local stacks like XAMPP) may auto-start the
+// session before this file is included, which would make changing session ini
+// values emit PHP warnings and break JSON responses. Only attempt to tweak the
+// session configuration when the session is not already active.
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', 0); // Set to 1 for HTTPS
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+}
 
 // CORS Configuration
 define('CORS_ALLOWED_ORIGINS', [
@@ -182,7 +194,7 @@ define('TWITTER_API_KEY', 'your-twitter-api-key');
 
 // Currency Configuration
 define('DEFAULT_CURRENCY', 'SYP');
-define('CURRENCY_SYMBOL', 'ل.س');
+define('APP_CURRENCY_SYMBOL', 'ل.س');
 define('CURRENCY_POSITION', 'after'); // before or after
 
 // Business Hours Configuration

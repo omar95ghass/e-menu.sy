@@ -1,4 +1,8 @@
 <?php
+if (!defined('API_BOOTSTRAPPED')) {
+    require_once __DIR__ . '/bootstrap.php';
+}
+
 // Restaurants endpoints
 $restaurant = new Restaurant();
 

@@ -48,10 +48,15 @@ class RestaurantPage {
         try {
             if (window.apiClient) {
                 const response = await window.apiClient.getRestaurant(this.slug);
-                if (response.ok && response.data) {
-                    this.restaurant = response.data;
-                    this.renderRestaurant();
-                    await this.loadMenu();
+                if (response && (response.success || response.ok)) {
+                    const restaurantData = response.data?.restaurant || response.data;
+                    if (restaurantData) {
+                        this.restaurant = this.normalizeRestaurantData(restaurantData);
+                        this.renderRestaurant();
+                        await this.loadMenu();
+                    } else {
+                        this.loadMockRestaurant();
+                    }
                 } else {
                     this.loadMockRestaurant();
                 }
@@ -98,11 +103,16 @@ class RestaurantPage {
             }
         };
 
-        this.restaurant = mockRestaurantData[this.slug];
-        if (!this.restaurant) {
+        const mockRestaurant = mockRestaurantData[this.slug];
+        if (!mockRestaurant) {
             this.showError('المطعم غير موجود');
             return;
         }
+
+        this.restaurant = {
+            ...this.normalizeRestaurantData(mockRestaurant),
+            categories: mockRestaurant.categories
+        };
 
         this.renderRestaurant();
         this.renderMenu();
@@ -112,9 +122,15 @@ class RestaurantPage {
         try {
             if (window.apiClient) {
                 const response = await window.apiClient.getRestaurantMenu(this.slug);
-                if (response.ok && response.data) {
-                    this.restaurant.categories = response.data;
-                    this.renderMenu();
+                if (response && (response.success || response.ok) && response.data) {
+                    const categories = Array.isArray(response.data)
+                        ? response.data
+                        : (Array.isArray(response.data?.data) ? response.data.data : []);
+
+                    if (categories.length) {
+                        this.restaurant.categories = categories;
+                        this.renderMenu();
+                    }
                 }
             }
         } catch (error) {
@@ -127,10 +143,17 @@ class RestaurantPage {
         if (!this.restaurant) return;
 
         // Update restaurant info
+        const imageElement = document.getElementById('restaurant-image');
+        const ratingElement = document.getElementById('restaurant-rating');
+
         document.getElementById('restaurant-name').textContent = this.restaurant.name;
-        document.getElementById('restaurant-image').src = this.restaurant.image;
-        document.getElementById('restaurant-image').alt = this.restaurant.name;
-        document.getElementById('restaurant-rating').textContent = `${this.restaurant.rating} (${this.restaurant.reviews} تقييم)`;
+        if (imageElement) {
+            imageElement.src = this.restaurant.image;
+            imageElement.alt = this.restaurant.name;
+        }
+        if (ratingElement) {
+            ratingElement.textContent = `${this.restaurant.rating} (${this.restaurant.reviews} تقييم)`;
+        }
         document.getElementById('restaurant-city').textContent = this.restaurant.city;
         document.getElementById('restaurant-description').textContent = this.restaurant.description;
         document.getElementById('restaurant-phone').textContent = this.restaurant.phone;
@@ -388,20 +411,73 @@ class RestaurantPage {
 
     async submitReview() {
         this.reviewText = document.getElementById('review-text').value;
-        
+
         try {
             if (window.apiClient) {
-                await window.apiClient.addRestaurantReview(this.slug, {
+                const response = await window.apiClient.addRestaurantReview(this.slug, {
                     rating: this.rating,
                     comment: this.reviewText
                 });
+
+                if (!response || !(response.success || response.ok)) {
+                    throw new Error(response?.message || 'فشل في إرسال التقييم');
+                }
             }
-            
+
             this.closeReviewModal();
             this.showNotification('تم إرسال التقييم بنجاح', 'success');
         } catch (error) {
-            this.showNotification('فشل في إرسال التقييم', 'error');
+            this.showNotification(error.message || 'فشل في إرسال التقييم', 'error');
         }
+    }
+
+    normalizeRestaurantData(raw) {
+        if (!raw) {
+            return null;
+        }
+
+        const fallbackImage = raw.cover_url
+            || raw.cover_image
+            || raw.logo_url
+            || raw.logo
+            || raw.image
+            || 'https://via.placeholder.com/800x400?text=E-Menu';
+
+        const averageRating = (typeof raw.average_rating !== 'undefined' && raw.average_rating !== null)
+            ? Number(raw.average_rating)
+            : null;
+        const normalizedRating = Number.isFinite(averageRating)
+            ? averageRating.toFixed(1)
+            : (typeof raw.rating !== 'undefined' ? raw.rating : '0');
+
+        const reviewsCount = raw.reviews_count ?? raw.reviews ?? 0;
+        const normalizedReviews = Number.isFinite(Number(reviewsCount)) ? Number(reviewsCount) : 0;
+
+        const formatHours = this.formatOperatingHours(raw.opening_time, raw.closing_time, raw.hours);
+
+        return {
+            ...raw,
+            image: fallbackImage,
+            rating: normalizedRating,
+            reviews: normalizedReviews,
+            city: raw.city || raw.city_ar || 'غير محدد',
+            description: raw.description || raw.description_ar || 'لا توجد تفاصيل متاحة حالياً.',
+            phone: raw.phone || 'غير متوفر',
+            address: raw.address || raw.address_ar || 'غير متوفر',
+            hours: formatHours
+        };
+    }
+
+    formatOperatingHours(opening, closing, fallback) {
+        if (fallback && fallback.trim() !== '') {
+            return fallback;
+        }
+
+        if (opening && closing) {
+            return `${opening} - ${closing}`;
+        }
+
+        return 'ساعات العمل غير محددة';
     }
 
     checkout() {

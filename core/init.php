@@ -24,15 +24,16 @@ date_default_timezone_set('Asia/Damascus');
 // Set default charset
 ini_set('default_charset', 'UTF-8');
 
-// Set session configuration
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', 0); // Set to 1 for HTTPS
-ini_set('session.use_strict_mode', 1);
-ini_set('session.gc_maxlifetime', 86400); // 24 hours
-
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
+// Set session configuration (skip when the session is already active to avoid warnings)
+$sessionStatus = session_status();
+if ($sessionStatus === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', 0); // Set to 1 for HTTPS
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.gc_maxlifetime', 86400); // 24 hours
     session_start();
+} elseif ($sessionStatus === PHP_SESSION_ACTIVE) {
+    // Session already active; leave ini settings as-is to prevent PHP warnings.
 }
 
 // Load configuration
