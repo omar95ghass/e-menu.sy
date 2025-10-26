@@ -55,14 +55,28 @@ class RestaurantDashboard {
         }
 
         try {
+<<<<<<< HEAD
+=======
+            console.log('RestaurantDashboard.loadData: fetching dashboard and analytics data');
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
             const [restaurantResponse, analyticsResponse] = await Promise.all([
                 this.client.getRestaurantDashboard(),
                 this.client.getRestaurantAnalytics().catch((error) => {
                     this.analyticsAvailable = false;
+<<<<<<< HEAD
+=======
+                    console.log('RestaurantDashboard.loadData: analytics request failed', error);
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
                     return { error };
                 })
             ]);
 
+<<<<<<< HEAD
+=======
+            console.log('RestaurantDashboard.loadData: restaurant response', restaurantResponse);
+            console.log('RestaurantDashboard.loadData: analytics response', analyticsResponse);
+
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
             const restaurantPayload = restaurantResponse.data || restaurantResponse;
             const restaurant = restaurantPayload.data || restaurantPayload;
             this.renderRestaurantInfo(restaurant);
@@ -118,6 +132,7 @@ class RestaurantDashboard {
                 : 'غير محدد';
 
             infoContainer.innerHTML = `
+<<<<<<< HEAD
                 <div class="row g-3">
                     <div class="col-12 col-md-6">
                         <div class="text-muted">رقم الهاتف</div>
@@ -139,6 +154,27 @@ class RestaurantDashboard {
                         <div class="text-muted">أوقات الدوام</div>
                         <div class="fw-semibold">${(restaurant.opening_time || '00:00')} - ${(restaurant.closing_time || '00:00')}</div>
                     </div>
+=======
+                <div class="info-row">
+                    <div class="info-label">رقم الهاتف</div>
+                    <div class="fw-semibold">${phone}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">البريد الإلكتروني</div>
+                    <div class="fw-semibold">${restaurant.email || 'غير متوفر'}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">العنوان</div>
+                    <div class="fw-semibold">${address}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">أيام العمل</div>
+                    <div class="fw-semibold">${workingDays}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">أوقات الدوام</div>
+                    <div class="fw-semibold">${(restaurant.opening_time || '00:00')} - ${(restaurant.closing_time || '00:00')}</div>
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
                 </div>
             `;
         }
@@ -158,6 +194,7 @@ class RestaurantDashboard {
                         online_ordering: 'الطلبات عبر الإنترنت',
                         custom_domain: 'نطاق مخصص'
                     };
+<<<<<<< HEAD
                     return `<li class="list-group-item d-flex justify-content-between align-items-center">
                         <span>${labels[key] || key}</span>
                         <span class="badge ${enabled ? 'bg-success' : 'bg-secondary'}">${enabled ? 'متاح' : 'غير متاح'}</span>
@@ -174,6 +211,22 @@ class RestaurantDashboard {
                     <ul class="list-group list-group-flush">
                         ${featureList || '<li class="list-group-item text-muted">لا توجد ميزات إضافية.</li>'}
                     </ul>
+=======
+                    return `<div class="feature-item">
+                        <span>${labels[key] || key}</span>
+                        <span class="badge ${enabled ? 'bg-success' : 'bg-secondary'}">${enabled ? 'متاح' : 'غير متاح'}</span>
+                    </div>`;
+                }).join('');
+
+                subscriptionContainer.innerHTML = `
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <div class="fw-semibold">${subscription.plan_name_ar || subscription.plan_name || 'خطة الاشتراك'}</div>
+                        <small class="text-muted">الحالة: ${this.describeSubscriptionStatus(subscription.status || restaurant.subscription_status)}</small>
+                    </div>
+                    <div class="feature-list">
+                        ${featureList || '<div class="text-muted">لا توجد ميزات إضافية.</div>'}
+                    </div>
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
                 `;
             }
         }
@@ -206,6 +259,15 @@ class RestaurantDashboard {
         this.updateGrowth('growth-menu-views', growth.menu_views);
         this.updateGrowth('growth-item-views', growth.item_views);
 
+<<<<<<< HEAD
+=======
+        const rangeLabel = analytics.range_label || analytics.range || null;
+        const rangeElement = document.getElementById('analytics-range');
+        if (rangeElement && rangeLabel) {
+            rangeElement.textContent = rangeLabel;
+        }
+
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
         this.renderPopularItems(analytics.popular_items || []);
         this.renderRecentReviews(analytics.recent_reviews || [], totals.total_reviews);
         this.renderDailyStats(analytics.daily_stats || []);
@@ -222,6 +284,12 @@ class RestaurantDashboard {
         const element = document.getElementById(elementId);
         if (!element) return;
 
+<<<<<<< HEAD
+=======
+        element.classList.remove('up', 'down');
+        element.classList.add('trend');
+
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
         if (value === null || value === undefined) {
             element.textContent = '';
             return;
@@ -235,8 +303,16 @@ class RestaurantDashboard {
 
         const sign = numeric > 0 ? '+' : '';
         element.textContent = `${sign}${numeric}%`;
+<<<<<<< HEAD
         element.classList.toggle('text-success', numeric > 0);
         element.classList.toggle('text-danger', numeric < 0);
+=======
+        if (numeric > 0) {
+            element.classList.add('trend', 'up');
+        } else if (numeric < 0) {
+            element.classList.add('trend', 'down');
+        }
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
     }
 
     renderPopularItems(items) {
@@ -245,12 +321,17 @@ class RestaurantDashboard {
         if (!container) return;
 
         if (!items.length) {
+<<<<<<< HEAD
             container.innerHTML = '<div class="list-group-item text-center text-muted">لا توجد بيانات بعد.</div>';
+=======
+            container.innerHTML = '<div class="pill-item text-center text-muted">لا توجد بيانات بعد.</div>';
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
             if (counter) counter.textContent = '';
             return;
         }
 
         container.innerHTML = items.map((item) => `
+<<<<<<< HEAD
             <div class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                     <div class="fw-semibold">${item.name_ar || item.name}</div>
@@ -259,6 +340,16 @@ class RestaurantDashboard {
                 <div class="text-end">
                     <div class="fw-bold">${Number(item.price || 0).toFixed(2)}</div>
                     <small class="text-warning">${Number(item.average_rating || 0).toFixed(1)} ★</small>
+=======
+            <div class="pill-item d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <div class="title">${item.name_ar || item.name}</div>
+                    <div class="meta">${this.auth.formatNumber(item.views_count || 0)} مشاهدة • ${this.auth.formatNumber(item.orders_count || 0)} طلب</div>
+                </div>
+                <div class="text-end">
+                    <div class="fw-bold">${Number(item.price || 0).toFixed(2)}</div>
+                    <div class="meta">${Number(item.average_rating || 0).toFixed(1)} ★</div>
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
                 </div>
             </div>
         `).join('');
@@ -274,7 +365,11 @@ class RestaurantDashboard {
         if (!container) return;
 
         if (!reviews.length) {
+<<<<<<< HEAD
             container.innerHTML = '<div class="list-group-item text-center text-muted">لا توجد تقييمات بعد.</div>';
+=======
+            container.innerHTML = '<div class="pill-item text-center text-muted">لا توجد تقييمات بعد.</div>';
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
             if (counter) counter.textContent = '';
             return;
         }
@@ -284,6 +379,7 @@ class RestaurantDashboard {
             const itemLabel = review.item_name_ar || review.item_name || 'قائمة المطعم';
             const customer = review.customer_name || review.user_name || 'زائر';
             return `
+<<<<<<< HEAD
             <div class="list-group-item">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="fw-semibold">${customer}</div>
@@ -291,6 +387,15 @@ class RestaurantDashboard {
                 </div>
                 <p class="mb-2">${review.comment || 'بدون تعليق'}</p>
                 <small class="text-muted">${itemLabel}${reviewDate ? ` • ${reviewDate}` : ''}</small>
+=======
+            <div class="pill-item">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="title">${customer}</div>
+                    <span class="badge bg-warning text-dark">${Number(review.rating || 0).toFixed(1)} ★</span>
+                </div>
+                <p class="mb-2">${review.comment || 'بدون تعليق'}</p>
+                <div class="meta">${itemLabel}${reviewDate ? ` • ${reviewDate}` : ''}</div>
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
             </div>
         `;
         }).join('');

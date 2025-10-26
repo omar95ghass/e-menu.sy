@@ -1,0 +1,353 @@
+:root {
+    --dashboard-bg: #f5f7fb;
+    --dashboard-primary: #ff7a18;
+    --dashboard-primary-dark: #e96300;
+    --dashboard-card-bg: #ffffff;
+    --dashboard-text: #1f2933;
+    --dashboard-muted: #6b7280;
+    --dashboard-border: rgba(15, 23, 42, 0.08);
+    --dashboard-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+}
+
+body.restaurant-dashboard {
+    background: var(--dashboard-bg);
+    font-family: 'Tajawal', 'Cairo', 'Segoe UI', sans-serif;
+    color: var(--dashboard-text);
+}
+
+.dashboard-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    background: var(--dashboard-bg);
+}
+
+.dashboard-sidebar {
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+    color: #ffffff;
+    padding: 2.5rem 2rem 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dashboard-sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.dashboard-sidebar .brand span {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--dashboard-primary);
+    font-size: 1.35rem;
+}
+
+.dashboard-sidebar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.dashboard-sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.dashboard-sidebar nav a.active,
+.dashboard-sidebar nav a:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.dashboard-sidebar .profile-chip {
+    margin-top: auto;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    display: grid;
+    gap: 0.5rem;
+}
+
+.dashboard-sidebar .profile-chip .name {
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.dashboard-sidebar .profile-chip button {
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+}
+
+.dashboard-sidebar .profile-chip button:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.dashboard-main {
+    padding: 2.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.dashboard-main header.dashboard-topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.dashboard-topbar .title-block h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.dashboard-topbar .title-block p {
+    color: var(--dashboard-muted);
+    margin: 0;
+}
+
+.dashboard-topbar .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.dashboard-topbar .actions a,
+.dashboard-topbar .actions button {
+    border-radius: 12px;
+    padding: 0.65rem 1.4rem;
+    font-weight: 600;
+}
+
+.dashboard-topbar .actions a {
+    border: 1px solid var(--dashboard-primary);
+    color: var(--dashboard-primary);
+    background: transparent;
+}
+
+.dashboard-topbar .actions a:hover {
+    background: rgba(255, 122, 24, 0.1);
+}
+
+.dashboard-topbar .actions button {
+    border: none;
+    background: linear-gradient(135deg, var(--dashboard-primary) 0%, var(--dashboard-primary-dark) 100%);
+    color: #fff;
+}
+
+.dashboard-topbar .actions button:hover {
+    filter: brightness(0.95);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.metric-card {
+    background: var(--dashboard-card-bg);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: var(--dashboard-shadow);
+    border: 1px solid var(--dashboard-border);
+    display: grid;
+    gap: 0.75rem;
+}
+
+.metric-card .label {
+    color: var(--dashboard-muted);
+    font-weight: 500;
+}
+
+.metric-card .value {
+    font-size: 1.95rem;
+    font-weight: 700;
+}
+
+.metric-card .trend.up {
+    color: #16a34a;
+}
+
+.metric-card .trend.down {
+    color: #dc2626;
+}
+
+.surface {
+    background: var(--dashboard-card-bg);
+    border-radius: 22px;
+    box-shadow: var(--dashboard-shadow);
+    border: 1px solid var(--dashboard-border);
+}
+
+.surface .surface-header {
+    padding: 1.4rem 1.8rem 1rem;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.surface .surface-body {
+    padding: 1.8rem;
+}
+
+.surface .surface-body-light {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.3) 100%);
+}
+
+.info-grid {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.info-grid .info-row {
+    display: grid;
+    gap: 0.3rem;
+}
+
+.info-grid .info-label {
+    color: var(--dashboard-muted);
+    font-size: 0.9rem;
+}
+
+.feature-list {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.feature-list .feature-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.1rem;
+    border-radius: 14px;
+    background: rgba(249, 250, 251, 0.9);
+    border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+.feature-item .badge {
+    border-radius: 999px;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.9rem;
+}
+
+.analytics-alert {
+    border-radius: 16px;
+    padding: 1.1rem 1.3rem;
+    margin: 0;
+}
+
+.list-pills {
+    display: grid;
+    gap: 1rem;
+}
+
+.list-pills .pill-item {
+    padding: 1.2rem 1.4rem;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: var(--dashboard-shadow);
+}
+
+.list-pills .pill-item .title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.list-pills .pill-item .meta {
+    color: var(--dashboard-muted);
+    font-size: 0.85rem;
+}
+
+.table-dashboard thead th {
+    font-weight: 600;
+    color: var(--dashboard-muted);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.table-dashboard tbody tr td {
+    padding: 1rem 1.2rem;
+    vertical-align: middle;
+}
+
+.dashboard-footer {
+    text-align: center;
+    color: var(--dashboard-muted);
+    font-size: 0.9rem;
+    padding-bottom: 2rem;
+}
+
+@media (max-width: 1199px) {
+    .dashboard-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-sidebar {
+        position: relative;
+        height: auto;
+        border-radius: 0 0 30px 30px;
+        margin: 0 1.5rem;
+        box-shadow: var(--dashboard-shadow);
+    }
+}
+
+@media (max-width: 767px) {
+    .dashboard-main {
+        padding: 1.8rem 1.25rem 2.5rem;
+    }
+
+    .dashboard-topbar .actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .dashboard-sidebar {
+        margin: 0 1rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .dashboard-sidebar {
+        padding: 2rem 1.5rem;
+    }
+
+    .dashboard-sidebar nav a {
+        padding: 0.8rem 0.9rem;
+    }
+
+    .metric-card {
+        padding: 1.25rem;
+    }
+}

@@ -147,6 +147,7 @@ function getRequestHeaders(): array {
     return $headers;
 }
 
+<<<<<<< HEAD
 // $requiresCsrfVerification = in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'], true);
 // if ($requiresCsrfVerification) {
 //     $headers = getRequestHeaders();
@@ -165,3 +166,23 @@ function getRequestHeaders(): array {
 //         sendError('تعذر التحقق من رمز الحماية', 500, ['details' => $exception->getMessage()]);
 //     }
 // }
+=======
+$requiresCsrfVerification = in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'], true);
+if ($requiresCsrfVerification) {
+    $headers = getRequestHeaders();
+    $csrfToken = $headers['x-csrf-token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
+
+    if (empty($csrfToken)) {
+        sendError('رمز الحماية غير موجود', 419);
+    }
+
+    try {
+        $csrfAuth = new Auth();
+        if (!$csrfAuth->verifyCSRFToken($csrfToken)) {
+            sendError('رمز الحماية غير صالح أو منتهي الصلاحية', 419);
+        }
+    } catch (Throwable $exception) {
+        sendError('تعذر التحقق من رمز الحماية', 500, ['details' => $exception->getMessage()]);
+    }
+}
+>>>>>>> 39a156036e9a9ff85cccc5aa0169f4e192966fb6
