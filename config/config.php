@@ -131,10 +131,16 @@ if (defined('ENVIRONMENT') && ENVIRONMENT === 'production') {
 }
 
 // Session Configuration
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', 0); // Set to 1 for HTTPS
-ini_set('session.use_strict_mode', 1);
-ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+// Some hosting environments (or local stacks like XAMPP) may auto-start the
+// session before this file is included, which would make changing session ini
+// values emit PHP warnings and break JSON responses. Only attempt to tweak the
+// session configuration when the session is not already active.
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', 0); // Set to 1 for HTTPS
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+}
 
 // CORS Configuration
 define('CORS_ALLOWED_ORIGINS', [
