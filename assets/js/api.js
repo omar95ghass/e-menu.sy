@@ -11,9 +11,59 @@ class APIClient {
                 : '/api';
         };
 
-        const resolvedBase = typeof window.buildApiUrl === 'function'
-            ? window.buildApiUrl('')
-            : fallbackBase();
+        const deriveBaseFromScript = () => {
+            const extractBasePath = (src) => {
+                if (!src) return null;
+
+                try {
+                    const url = new URL(src, window.location.origin);
+                    let path = url.pathname.replace(/\\/g, '/');
+                    path = path.replace(/\/+/g, '/');
+                    path = path.replace(/\/?assets\/js\/[^/]+$/, '');
+                    path = path.replace(/\/$/, '');
+                    return path;
+                } catch (error) {
+                    return null;
+                }
+            };
+
+            if (Object.prototype.hasOwnProperty.call(window, '__APP_SCRIPT_BASE__')) {
+                return window.__APP_SCRIPT_BASE__;
+            }
+
+            let derived = extractBasePath(document.currentScript && document.currentScript.src);
+
+            if (derived === null) {
+                const scripts = document.getElementsByTagName('script');
+                for (const script of scripts) {
+                    const src = script.getAttribute('src');
+                    if (!src) continue;
+                    if (src.includes('assets/js/api.js') || src.includes('assets/js/app.js')) {
+                        derived = extractBasePath(src);
+                        if (derived !== null) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            window.__APP_SCRIPT_BASE__ = derived;
+            return derived;
+        };
+
+        const resolvedBase = (() => {
+            if (typeof window.buildApiUrl === 'function') {
+                return window.buildApiUrl('');
+            }
+
+            const derived = deriveBaseFromScript();
+            if (derived !== null && typeof derived === 'string') {
+                const normalized = derived.replace(/\/$/, '');
+                return normalized ? `${normalized}/api` : '/api';
+            }
+
+            return fallbackBase();
+        })();
 
         this.baseURL = resolvedBase || fallbackBase();
         this.csrfToken = null;
@@ -30,6 +80,11 @@ class APIClient {
                 method: 'GET',
                 credentials: 'include'
             });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to fetch CSRF token (${response.status}): ${errorText}`);
+            }
+
             const data = await response.json();
             if (data.ok && data.token) {
                 this.csrfToken = data.token;
